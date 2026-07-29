@@ -1,7 +1,6 @@
 const express = require('express');
 const db = require('../db');
 const { verifyToken } = require('../middleware/auth');
-const { subscribeContact } = require('../utils/emailoctopus');
 
 const router = express.Router();
 
@@ -27,14 +26,6 @@ router.post('/', (req, res) => {
       service ? service.trim().slice(0, 100) : null,
       message.trim()
     );
-
-    // Fire-and-forget EmailOctopus subscribe (never blocks the response)
-    const nameParts = name.trim().split(' ');
-    subscribeContact(db, {
-      email: email.trim().toLowerCase(),
-      firstName: nameParts[0] || '',
-      lastName: nameParts.slice(1).join(' ') || '',
-    }).catch(() => {});
 
     res.json({ success: true, id: result.lastInsertRowid });
   } catch (err) {

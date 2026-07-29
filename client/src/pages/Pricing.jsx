@@ -5,6 +5,113 @@ import Footer from '../components/Footer.jsx';
 import CTA from '../components/CTA.jsx';
 import useReveal from '../hooks/useReveal.js';
 
+/* ── Plan sign-up modal ── */
+function PlanModal({ plan, onClose }) {
+  const [form, setForm]     = useState({ name: '', email: '' });
+  const [status, setStatus] = useState('idle'); // idle | loading | success | error
+  const [errMsg, setErrMsg] = useState('');
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setStatus('loading');
+    try {
+      const res = await fetch('/api/plan-signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...form, plan: plan.name }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Something went wrong');
+      setStatus('success');
+    } catch (err) {
+      setErrMsg(err.message);
+      setStatus('error');
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(6px)' }}>
+      <div className="w-full max-w-md rounded-2xl p-8 relative"
+        style={{ background: 'var(--bg-secondary)', border: '1px solid var(--border)', boxShadow: '0 40px 80px rgba(0,0,0,0.5)' }}>
+        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full flex items-center justify-center text-sm"
+          style={{ background: 'var(--bg-card)', color: 'var(--text-secondary)' }}>✕</button>
+
+        {status === 'success' ? (
+          <div className="text-center py-6">
+            <div className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'rgba(16,185,129,0.15)', border: '2px solid rgba(16,185,129,0.4)' }}>
+              <svg className="w-8 h-8" fill="none" stroke="#10b981" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h3 className="font-display font-bold text-xl mb-2" style={{ color: 'var(--text-primary)' }}>You're in! 🎉</h3>
+            <p className="text-sm leading-relaxed" style={{ color: 'var(--text-secondary)' }}>
+              We've got your details for the <strong style={{ color: 'var(--primary)' }}>{plan.name}</strong> plan.
+              We'll be in touch within 24 hours to get things moving.
+            </p>
+            <button onClick={onClose} className="btn-primary mt-6 w-full" style={{ justifyContent: 'center' }}>
+              Close
+            </button>
+          </div>
+        ) : (
+          <>
+            <div className="mb-1">
+              <span className="section-label">{plan.tagline}</span>
+            </div>
+            <h3 className="font-display font-bold text-2xl mb-1" style={{ color: 'var(--text-primary)' }}>
+              Get Started with {plan.name}
+            </h3>
+            <p className="text-sm mb-6" style={{ color: 'var(--text-secondary)' }}>
+              Leave your details and we'll be in touch within 24 hours to kick things off.
+            </p>
+
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                  style={{ color: 'var(--text-secondary)' }}>Your Name *</label>
+                <input
+                  type="text" required maxLength={100}
+                  value={form.name} onChange={e => setForm(f => ({ ...f, name: e.target.value }))}
+                  placeholder="Jane Smith"
+                  className="w-full glass rounded-xl px-4 py-3 text-sm outline-none"
+                  style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                />
+              </div>
+              <div>
+                <label className="block text-xs font-semibold mb-1.5 uppercase tracking-wide"
+                  style={{ color: 'var(--text-secondary)' }}>Email Address *</label>
+                <input
+                  type="email" required maxLength={200}
+                  value={form.email} onChange={e => setForm(f => ({ ...f, email: e.target.value }))}
+                  placeholder="jane@example.com"
+                  className="w-full glass rounded-xl px-4 py-3 text-sm outline-none"
+                  style={{ color: 'var(--text-primary)', border: '1px solid var(--border)' }}
+                  onFocus={e => e.target.style.borderColor = 'var(--primary)'}
+                  onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                />
+              </div>
+              {status === 'error' && (
+                <p className="text-sm px-4 py-3 rounded-xl" style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171', border: '1px solid rgba(239,68,68,0.3)' }}>
+                  {errMsg}
+                </p>
+              )}
+              <button type="submit" disabled={status === 'loading'} className="btn-primary w-full mt-1"
+                style={{ justifyContent: 'center', fontSize: '1rem', padding: '0.9rem' }}>
+                {status === 'loading' ? 'Sending…' : `Get Started with ${plan.name}`}
+              </button>
+              <p className="text-center text-xs" style={{ color: 'var(--text-secondary)' }}>
+                No commitment — we'll chat first and make sure it's the right fit.
+              </p>
+            </form>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
 // Monthly = spread over 6 months (includes ~20% premium for flexibility)
 // Yearly  = one-off upfront — shown as per/month equivalent so user can compare
 const plans = [
@@ -86,7 +193,7 @@ const CrossIcon = () => (
   </svg>
 );
 
-function PricingCard({ plan, billing, delay }) {
+function PricingCard({ plan, billing, delay, onSelect }) {
   const ref = useReveal();
   const pricing = billing === 'monthly' ? plan.monthly : plan.yearly;
   const isYearly = billing === 'yearly';
@@ -164,24 +271,26 @@ function PricingCard({ plan, billing, delay }) {
         ))}
       </div>
 
-      <Link
-        to="/contact"
+      <button
+        onClick={() => onSelect(plan)}
         className={plan.popular ? 'btn-primary' : 'btn-secondary'}
-        style={{ textAlign: 'center', justifyContent: 'center' }}
+        style={{ textAlign: 'center', justifyContent: 'center', width: '100%' }}
       >
         {plan.cta}
-      </Link>
+      </button>
     </div>
   );
 }
 
 export default function Pricing() {
-  const [billing, setBilling] = useState('monthly');
+  const [billing, setBilling]       = useState('monthly');
+  const [selectedPlan, setSelectedPlan] = useState(null);
   const ref = useReveal();
 
   return (
     <>
       <Navbar />
+      {selectedPlan && <PlanModal plan={selectedPlan} onClose={() => setSelectedPlan(null)} />}
       <main style={{ background: 'var(--bg-primary)' }}>
         {/* Hero */}
         <section className="page-hero" style={{ background: 'var(--gradient-bg)' }}>
@@ -248,7 +357,7 @@ export default function Pricing() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {plans.map((plan, i) => (
-                <PricingCard key={plan.name} plan={plan} billing={billing} delay={i * 100} />
+                <PricingCard key={plan.name} plan={plan} billing={billing} delay={i * 100} onSelect={setSelectedPlan} />
               ))}
             </div>
 
