@@ -13,7 +13,8 @@ const reviewRoutes    = require('./routes/reviews');
 const chatRoutes      = require('./routes/chat');
 const knowledgeRoutes = require('./routes/knowledge');
 const settingsRoutes  = require('./routes/settings');
-const chatLogsRoutes  = require('./routes/chat_logs');
+const chatLogsRoutes    = require('./routes/chat_logs');
+const emailOctopusRoutes = require('./routes/emailoctopus');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -50,7 +51,8 @@ app.use('/api/reviews',   reviewRoutes);
 app.use('/api/chat',      chatLimiter, chatRoutes);
 app.use('/api/knowledge', knowledgeRoutes);
 app.use('/api/settings',  settingsRoutes);
-app.use('/api/chat-logs', chatLogsRoutes);
+app.use('/api/chat-logs',    chatLogsRoutes);
+app.use('/api/emailoctopus', emailOctopusRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

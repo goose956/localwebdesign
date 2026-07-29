@@ -253,12 +253,241 @@ export default function Settings() {
         ))}
 
         {/* Security note */}
+        <EmailOctopusSection settings={settings} onSave={load} />
+
         <div className="rounded-xl p-4 flex items-start gap-3" style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.04)' }}>
           <span className="text-lg flex-shrink-0">🔒</span>
           <p className="text-xs leading-relaxed" style={{ color: '#334155' }}>
             Sensitive values like API keys are stored in your server database and never sent to the browser. They are masked in this interface after saving. Your OpenAI key is only used server-side to power the chat.
           </p>
         </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── EmailOctopus dedicated section ── */
+function EmailOctopusSection({ settings, onSave }) {
+  const eoKey     = settings['emailoctopus_api_key'];
+  const eoListId  = settings['emailoctopus_list_id'];
+  const eoListName= settings['emailoctopus_list_name'];
+  const eoEnabled = settings['emailoctopus_enabled'];
+
+  const isKeySet     = eoKey?.isSet;
+  const isConfigured = isKeySet && eoListId?.isSet;
+  const isEnabled    = eoEnabled?.value === '1';
+
+  const [apiKeyInput, setApiKeyInput] = useState('');
+  const [showKey, setShowKey]         = useState(false);
+  const [editingKey, setEditingKey]   = useState(false);
+  const [lists, setLists]             = useState([]);
+  const [loadingLists, setLoadingLists] = useState(false);
+  const [listError, setListError]     = useState('');
+  const [saving, setSaving]           = useState(false);
+  const [msg, setMsg]                 = useState('');
+
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
+
+  const saveKey = async () => {
+    if (!apiKeyInput.trim()) return;
+    setSaving(true);
+    try {
+      await api.put('/settings/emailoctopus_api_key', { value: apiKeyInput.trim() });
+      setEditingKey(false);
+      setApiKeyInput('');
+      await onSave();
+      flash('API key saved ✓');
+    } catch (err) { flash(err.message); }
+    setSaving(false);
+  };
+
+  const loadLists = async () => {
+    setLoadingLists(true);
+    setListError('');
+    try {
+      const data = await api.get('/emailoctopus/lists');
+      setLists(data);
+      if (data.length === 0) setListError('No lists found in your EmailOctopus account.');
+    } catch (err) { setListError(err.message); }
+    setLoadingLists(false);
+  };
+
+  const selectList = async (list) => {
+    setSaving(true);
+    try {
+      await Promise.all([
+        api.put('/settings/emailoctopus_list_id',   { value: list.id }),
+        api.put('/settings/emailoctopus_list_name', { value: list.name }),
+      ]);
+      await onSave();
+      flash(`List "${list.name}" selected ✓`);
+    } catch (err) { flash(err.message); }
+    setSaving(false);
+  };
+
+  const toggleEnabled = async () => {
+    setSaving(true);
+    try {
+      await api.put('/settings/emailoctopus_enabled', { value: isEnabled ? '0' : '1' });
+      await onSave();
+    } catch {}
+    setSaving(false);
+  };
+
+  const clearAll = async () => {
+    if (!confirm('Disconnect EmailOctopus?')) return;
+    await Promise.all([
+      api.delete('/settings/emailoctopus_api_key'),
+      api.delete('/settings/emailoctopus_list_id'),
+      api.delete('/settings/emailoctopus_list_name'),
+      api.delete('/settings/emailoctopus_enabled'),
+    ]).catch(() => {});
+    setLists([]);
+    await onSave();
+  };
+
+  return (
+    <div className="admin-card">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-2xl">🐙</span>
+        <div className="flex-1">
+          <h2 className="font-semibold text-white text-base">EmailOctopus</h2>
+          <p className="text-xs" style={{ color: '#475569' }}>
+            Auto-subscribe contact form enquiries to your EmailOctopus list.
+          </p>
+        </div>
+        {isConfigured && (
+          <button onClick={clearAll} className="text-xs px-3 py-1.5 rounded-lg font-medium flex-shrink-0"
+            style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>Disconnect</button>
+        )}
+      </div>
+
+      {msg && (
+        <p className="text-xs font-semibold mb-3 mt-1" style={{ color: msg.includes('✓') ? '#34d399' : '#f87171' }}>{msg}</p>
+      )}
+
+      <div className="mt-5 flex flex-col gap-5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.25rem' }}>
+
+        {/* Step 1: API Key */}
+        <div>
+          <label className="admin-label">Step 1 — API Key</label>
+          {!editingKey ? (
+            <div className="flex items-center gap-3">
+              <div className="flex-1 admin-input flex items-center gap-2" style={{ minHeight: 42 }}>
+                {isKeySet ? (
+                  <><span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#10b981' }} />
+                  <span className="font-mono text-sm" style={{ color: '#94a3b8' }}>{eoKey.value}</span></>
+                ) : (
+                  <><span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#475569' }} />
+                  <span className="text-sm italic" style={{ color: '#475569' }}>Not set</span></>
+                )}
+              </div>
+              <button onClick={() => setEditingKey(true)}
+                className="px-4 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
+                style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>
+                {isKeySet ? 'Update' : 'Set'}
+              </button>
+            </div>
+          ) : (
+            <div className="flex flex-col gap-2">
+              <div className="relative">
+                <input
+                  className="admin-input w-full pr-10"
+                  type={showKey ? 'text' : 'password'}
+                  autoFocus
+                  value={apiKeyInput}
+                  onChange={e => setApiKeyInput(e.target.value)}
+                  placeholder="Your EmailOctopus API key"
+                  autoComplete="off"
+                />
+                <button type="button" className="absolute right-3 top-1/2 -translate-y-1/2" style={{ color: '#475569' }}
+                  onClick={() => setShowKey(v => !v)}>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={showKey
+                      ? "M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"
+                      : "M15 12a3 3 0 11-6 0 3 3 0 016 0zM2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"} />
+                  </svg>
+                </button>
+              </div>
+              <div className="flex gap-2">
+                <button onClick={saveKey} disabled={saving || !apiKeyInput.trim()}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                  {saving ? 'Saving…' : 'Save Key'}
+                </button>
+                <button onClick={() => { setEditingKey(false); setApiKeyInput(''); }}
+                  className="px-4 py-2 rounded-xl text-sm font-semibold"
+                  style={{ background: '#1e293b', color: '#94a3b8' }}>Cancel</button>
+              </div>
+            </div>
+          )}
+          <p className="text-xs mt-2 leading-relaxed" style={{ color: '#334155' }}>
+            Find your API key at{' '}
+            <a href="https://emailoctopus.com/account/api" target="_blank" rel="noopener noreferrer"
+              className="underline" style={{ color: '#6366f1' }}>emailoctopus.com/account/api</a>
+          </p>
+        </div>
+
+        {/* Step 2: Choose list */}
+        {isKeySet && (
+          <div>
+            <label className="admin-label">Step 2 — Choose Your List</label>
+            {eoListId?.isSet && (
+              <div className="flex items-center gap-2 mb-3 px-3 py-2 rounded-xl text-xs font-medium"
+                style={{ background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.2)' }}>
+                ✓ Currently using: <strong>{eoListName?.value || eoListId.value}</strong>
+              </div>
+            )}
+            <button onClick={loadLists} disabled={loadingLists}
+              className="px-4 py-2 rounded-xl text-sm font-semibold text-white mb-3 disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+              {loadingLists ? 'Loading…' : eoListId?.isSet ? '↺ Refresh Lists' : 'Load My Lists'}
+            </button>
+            {listError && <p className="text-xs mb-3" style={{ color: '#f87171' }}>{listError}</p>}
+            {lists.length > 0 && (
+              <div className="flex flex-col gap-2">
+                {lists.map(list => (
+                  <button key={list.id} onClick={() => selectList(list)} disabled={saving}
+                    className="flex items-center justify-between px-4 py-3 rounded-xl text-sm text-left transition-all"
+                    style={{
+                      background: eoListId?.value === list.id ? 'rgba(99,102,241,0.15)' : '#0f172a',
+                      border: `1px solid ${eoListId?.value === list.id ? '#6366f1' : 'rgba(255,255,255,0.06)'}`,
+                      color: '#e2e8f0',
+                    }}>
+                    <span className="font-medium">{list.name}</span>
+                    <span className="text-xs" style={{ color: '#475569' }}>
+                      {list.counts?.subscribed ?? 0} subscribers
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 3: Enable */}
+        {isConfigured && (
+          <div>
+            <label className="admin-label">Step 3 — Enable Auto-Subscribe</label>
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl"
+              style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.06)' }}>
+              <div>
+                <p className="text-sm font-medium" style={{ color: '#e2e8f0' }}>
+                  Auto-subscribe contact form submissions
+                </p>
+                <p className="text-xs mt-0.5" style={{ color: '#475569' }}>
+                  When someone fills in the contact form, they're added to your EmailOctopus list tagged <code>website-enquiry</code>
+                </p>
+              </div>
+              <button onClick={toggleEnabled} disabled={saving}
+                className="relative flex-shrink-0 w-11 h-6 rounded-full transition-colors duration-200 ml-4"
+                style={{ background: isEnabled ? '#6366f1' : '#1e293b', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <span className="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200"
+                  style={{ transform: isEnabled ? 'translateX(20px)' : 'translateX(0)' }} />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
