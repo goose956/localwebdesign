@@ -103,6 +103,8 @@ In the Railway dashboard → your service → Variables, add:
 | `JWT_SECRET`   | (generate a long random string)|
 | `ADMIN_PASSWORD` | (your secure admin password) |
 | `PORT`         | `5000` (or leave blank for Railway auto)|
+| `OPENAI_API_KEY` | your OpenAI key (powers the chat widget) |
+| `SITE_SYNC_KEY` | a long random string — shared with Site Builder's Settings so it can sync chat data and publish to the Portfolio page |
 
 ### 4. Deploy
 
@@ -113,11 +115,11 @@ Railway will automatically:
 
 ### 5. Persistent Storage (Important!)
 
-SQLite data is stored in `server/database.db`. On Railway, this file **will be lost on redeploy** unless you add a persistent volume:
+SQLite data is stored in `server/database.db`, and uploaded portfolio thumbnails are stored in `server/uploads/`. On Railway, both **will be lost on redeploy** unless you add a persistent volume:
 
 1. In Railway: Service → Volumes → Add Volume
 2. Mount path: `/app/server`
-3. This preserves your database across deployments
+3. This preserves your database and uploaded images across deployments
 
 ---
 
