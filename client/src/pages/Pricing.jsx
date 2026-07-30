@@ -128,10 +128,8 @@ const plans = [
       'Basic on-page SEO & Google listing',
       'Google Analytics setup',
       '3 revision rounds',
-      '30-day post-launch support',
-      'SSL & hosting guidance',
     ],
-    notIncluded: ['Blog / News section', 'Booking system'],
+    notIncluded: [],
     cta: 'Get Started',
     popular: false,
   },
@@ -148,10 +146,6 @@ const plans = [
       'Advanced local SEO',
       'Custom animations & interactions',
       'Blog / News section',
-      'Google Analytics + Search Console',
-      '5 revision rounds',
-      '60-day post-launch support',
-      'Speed & performance optimisation',
     ],
     notIncluded: [],
     cta: 'Get Started',
@@ -170,10 +164,6 @@ const plans = [
       'Advanced animations',
       'CMS for easy content editing',
       'Priority local SEO',
-      'Unlimited revision rounds',
-      '12-month priority support',
-      'Monthly maintenance option',
-      'Dedicated project manager',
     ],
     notIncluded: [],
     cta: "Let's Talk",
@@ -297,20 +287,15 @@ export default function Pricing() {
           <div className="orb orb-1" style={{ opacity: 0.1 }} />
           <div className="orb orb-2" style={{ opacity: 0.07 }} />
           <div className="absolute inset-0 grid-overlay" />
-          <div className="relative max-w-3xl mx-auto px-6">
-            <p className="section-label mb-4">Transparent Pricing</p>
-            <h1 className="section-title mb-6">
-              Simple Pricing,<br />
-              <span className="gradient-text">Exceptional Results</span>
+          <div className="relative max-w-5xl mx-auto px-6">
+            <h1 className="section-title" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.75rem)' }}>
+              Simple Pricing, <span className="gradient-text">Exceptional Results</span>
             </h1>
-            <p className="section-subtitle mx-auto">
-              No hidden fees. No confusing jargon. Pay upfront or spread the cost — your choice.
-            </p>
           </div>
         </section>
 
         {/* Plans */}
-        <section className="py-20 relative">
+        <section className="py-10 relative">
           <div className="max-w-7xl mx-auto px-6">
 
             {/* Billing toggle */}
@@ -340,8 +325,14 @@ export default function Pricing() {
               </div>
             </div>
 
-            {/* Context banner */}
-            <div className="max-w-2xl mx-auto mb-10">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {plans.map((plan, i) => (
+                <PricingCard key={plan.name} plan={plan} billing={billing} delay={i * 100} onSelect={setSelectedPlan} />
+              ))}
+            </div>
+
+            {/* Context banner — below the cards */}
+            <div className="max-w-2xl mx-auto mt-8">
               {billing === 'yearly' ? (
                 <div className="text-center px-5 py-3.5 rounded-2xl text-sm"
                   style={{ background: 'rgba(16,185,129,0.08)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.15)' }}>
@@ -353,12 +344,6 @@ export default function Pricing() {
                   <strong>Monthly</strong> — pay in 12 equal monthly instalments. Same great service, easier on cash flow.
                 </div>
               )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {plans.map((plan, i) => (
-                <PricingCard key={plan.name} plan={plan} billing={billing} delay={i * 100} onSelect={setSelectedPlan} />
-              ))}
             </div>
 
             <div className="mt-14 text-center reveal" ref={ref}>

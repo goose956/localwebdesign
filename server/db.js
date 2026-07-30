@@ -1,8 +1,13 @@
 const Database = require('better-sqlite3');
 const bcrypt = require('bcryptjs');
 const path = require('path');
+const fs = require('fs');
 
 const db = new Database(path.join(__dirname, 'database.db'));
+
+// Destination for portfolio thumbnails uploaded from Site Builder — same persistent volume as
+// database.db, so it survives restarts/redeploys the same way the DB already does.
+fs.mkdirSync(path.join(__dirname, 'uploads', 'portfolio'), { recursive: true });
 
 db.pragma('journal_mode = WAL');
 
@@ -79,6 +84,7 @@ db.exec(`
   CREATE TABLE IF NOT EXISTS chat_sessions (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     session_id TEXT UNIQUE NOT NULL,
+    client_site_id TEXT DEFAULT NULL,
     message_count INTEGER DEFAULT 0,
     started_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     last_message_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -91,7 +97,62 @@ db.exec(`
     content TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   );
+
+  CREATE TABLE IF NOT EXISTS clients (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    site_id TEXT UNIQUE NOT NULL,
+    business_name TEXT NOT NULL DEFAULT '',
+    phone TEXT DEFAULT '',
+    address TEXT DEFAULT '',
+    about_text TEXT DEFAULT '',
+    services TEXT DEFAULT '[]',
+    extra_notes TEXT DEFAULT '',
+    synced_at DATETIME,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
+
+  CREATE TABLE IF NOT EXISTS briefs (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT DEFAULT '',
+    business_name TEXT DEFAULT '',
+    business_type TEXT DEFAULT '',
+    project_type TEXT DEFAULT '',
+    pages TEXT DEFAULT '[]',
+    features TEXT DEFAULT '[]',
+    reference_sites TEXT DEFAULT '',
+    style_notes TEXT DEFAULT '',
+    budget TEXT DEFAULT '',
+    timeline TEXT DEFAULT '',
+    extra_info TEXT DEFAULT '',
+    status TEXT DEFAULT 'new',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  );
 `);
+
+// One-time migration for existing (already-deployed) databases — CREATE TABLE IF NOT EXISTS
+// above won't retroactively add a column to a chat_sessions table that already existed before
+// this column did. NULL means "Pixel&Craft's own visitor chat"; a real site_id means a Site
+// Builder client's demo site.
+const chatSessionCols = db.prepare("PRAGMA table_info(chat_sessions)").all().map(c => c.name);
+if (!chatSessionCols.includes('client_site_id')) {
+  db.exec('ALTER TABLE chat_sessions ADD COLUMN client_site_id TEXT DEFAULT NULL');
+}
+
+// SQLite can't add a UNIQUE column via ALTER TABLE — uniqueness for site_id is enforced at the
+// application layer in the site-sync upsert instead (looked up by value, same as clients.site_id).
+const portfolioCols = db.prepare("PRAGMA table_info(portfolio)").all().map(c => c.name);
+if (!portfolioCols.includes('site_id')) {
+  db.exec('ALTER TABLE portfolio ADD COLUMN site_id TEXT DEFAULT NULL');
+}
+if (!portfolioCols.includes('synced_at')) {
+  db.exec('ALTER TABLE portfolio ADD COLUMN synced_at DATETIME DEFAULT NULL');
+}
+// ON CONFLICT(site_id) in the site-sync upsert requires an actual unique index (ALTER TABLE ADD
+// COLUMN can't declare UNIQUE directly) — safe with existing NULL site_id rows, since SQLite
+// treats each NULL as distinct for uniqueness purposes.
+db.exec('CREATE UNIQUE INDEX IF NOT EXISTS idx_portfolio_site_id ON portfolio(site_id)');
 
 // Seed default themes
 const themeCount = db.prepare('SELECT COUNT(*) as count FROM themes').get();

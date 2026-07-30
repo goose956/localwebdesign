@@ -7,6 +7,7 @@ import Home       from './pages/Home.jsx';
 import Pricing    from './pages/Pricing.jsx';
 import Portfolio  from './pages/Portfolio.jsx';
 import Contact    from './pages/Contact.jsx';
+import StartProject from './pages/StartProject.jsx';
 
 import AdminLogin        from './admin/AdminLogin.jsx';
 import AdminLayout       from './admin/AdminLayout.jsx';
@@ -19,6 +20,8 @@ import ReviewsManager    from './admin/ReviewsManager.jsx';
 import ChatKnowledge     from './admin/ChatKnowledge.jsx';
 import Settings          from './admin/Settings.jsx';
 import ChatLogs          from './admin/ChatLogs.jsx';
+import BriefManager      from './admin/BriefManager.jsx';
+import Clients           from './admin/Clients.jsx';
 
 export default function App() {
   return (
@@ -27,10 +30,11 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             {/* Public */}
-            <Route path="/"          element={<Home />} />
-            <Route path="/pricing"   element={<Pricing />} />
-            <Route path="/portfolio" element={<Portfolio />} />
-            <Route path="/contact"   element={<Contact />} />
+            <Route path="/"              element={<Home />} />
+            <Route path="/pricing"       element={<Pricing />} />
+            <Route path="/portfolio"     element={<Portfolio />} />
+            <Route path="/contact"       element={<Contact />} />
+            <Route path="/start-project" element={<StartProject />} />
 
             {/* Admin login */}
             <Route path="/admin" element={<AdminLogin />} />
@@ -45,6 +49,8 @@ export default function App() {
               <Route path="chatbot"    element={<ChatKnowledge />} />
               <Route path="settings"   element={<Settings />} />
               <Route path="chat-logs"  element={<ChatLogs />} />
+              <Route path="clients"    element={<Clients />} />
+              <Route path="briefs"      element={<BriefManager />} />
             </Route>
 
             <Route path="*" element={<Navigate to="/" replace />} />
