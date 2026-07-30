@@ -70,7 +70,7 @@ app.use('/api', apiLimiter);
 
 // Portfolio thumbnails uploaded from Site Builder — plain static file serving, no CORS needed
 // since <img src> loads aren't subject to it (unlike the fetch calls to /api/chat, /api/site-sync).
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static(path.join(__dirname, 'data', 'uploads')));
 
 // API routes
 app.use('/api/contact',   contactLimiter, contactRoutes);

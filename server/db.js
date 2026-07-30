@@ -3,11 +3,35 @@ const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
 
-const db = new Database(path.join(__dirname, 'database.db'));
+// All persisted, mutable state (SQLite file + uploaded images) lives under data/ — deliberately
+// NOT directly in server/, so a Railway volume can be mounted at server/data without also
+// masking the application code that lives alongside it (mounting a volume at a path overlays
+// it, hiding whatever the image had there — mounting straight at server/ made server.js itself
+// disappear at runtime: "Cannot find module '/app/server/server.js'").
+const dataDir = path.join(__dirname, 'data')
+fs.mkdirSync(dataDir, { recursive: true })
+
+// One-time migration for existing local installs: move a pre-existing server/database.db (from
+// before this data/ split) into its new home, rather than silently starting a fresh empty DB.
+const legacyDbPath = path.join(__dirname, 'database.db')
+const dbPath = path.join(dataDir, 'database.db')
+if (fs.existsSync(legacyDbPath) && !fs.existsSync(dbPath)) {
+  fs.renameSync(legacyDbPath, dbPath)
+  for (const ext of ['-shm', '-wal']) {
+    if (fs.existsSync(legacyDbPath + ext)) fs.renameSync(legacyDbPath + ext, dbPath + ext)
+  }
+}
+
+const db = new Database(dbPath)
 
 // Destination for portfolio thumbnails uploaded from Site Builder — same persistent volume as
 // database.db, so it survives restarts/redeploys the same way the DB already does.
-fs.mkdirSync(path.join(__dirname, 'uploads', 'portfolio'), { recursive: true });
+const legacyUploadsDir = path.join(__dirname, 'uploads')
+const uploadsDir = path.join(dataDir, 'uploads')
+if (fs.existsSync(legacyUploadsDir) && !fs.existsSync(uploadsDir)) {
+  fs.renameSync(legacyUploadsDir, uploadsDir)
+}
+fs.mkdirSync(path.join(uploadsDir, 'portfolio'), { recursive: true });
 
 db.pragma('journal_mode = WAL');
 

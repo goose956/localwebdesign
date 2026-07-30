@@ -115,11 +115,13 @@ Railway will automatically:
 
 ### 5. Persistent Storage (Important!)
 
-SQLite data is stored in `server/database.db`, and uploaded portfolio thumbnails are stored in `server/uploads/`. On Railway, both **will be lost on redeploy** unless you add a persistent volume:
+SQLite data and uploaded portfolio thumbnails are stored under `server/data/`. On Railway, this **will be lost on redeploy** unless you add a persistent volume:
 
 1. In Railway: Service → Volumes → Add Volume
-2. Mount path: `/app/server`
+2. Mount path: `/app/server/data`
 3. This preserves your database and uploaded images across deployments
+
+**Important:** the mount path must be `/app/server/data`, not `/app/server`. Mounting a volume overlays that directory with the volume's (initially empty) contents — mounting it directly at `server/` would hide your actual application code (`server.js`, `node_modules`, etc.) and the app would fail to start with `Cannot find module '/app/server/server.js'`. `data/` is a dedicated, code-free subdirectory specifically so this is safe.
 
 ---
 

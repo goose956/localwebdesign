@@ -6,7 +6,7 @@ const db = require('../db');
 
 const router = express.Router();
 
-const UPLOADS_DIR = path.join(__dirname, '..', 'uploads', 'portfolio');
+const UPLOADS_DIR = path.join(__dirname, '..', 'data', 'uploads', 'portfolio');
 const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: 8 * 1024 * 1024 } });
 
 // Public routes (no admin JWT) — called directly by Site Builder's own publish step and by
