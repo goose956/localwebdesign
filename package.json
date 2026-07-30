@@ -2,6 +2,9 @@
   "name": "design-website",
   "version": "1.0.0",
   "description": "Website design company - full stack app",
+  "engines": {
+    "node": "22.x"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "cd server && npm run dev",
