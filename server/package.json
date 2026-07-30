@@ -1,6 +1,9 @@
 {
   "name": "design-website-server",
   "version": "1.0.0",
+  "engines": {
+    "node": ">=22"
+  },
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
