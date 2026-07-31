@@ -43,7 +43,13 @@ export default function Hero() {
         <h1 className="section-title mb-6" style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', lineHeight: 1.08 }}>
           Beautiful Websites.<br />
           <span className="gradient-text">
-            Open &amp; <strong style={{ fontWeight: 900 }}>responding</strong> 24/7.
+            Open &amp; <strong style={{
+              fontWeight: 900,
+              textDecoration: 'underline',
+              textDecorationColor: 'var(--primary-dark)',
+              textDecorationThickness: '5px',
+              textUnderlineOffset: '6px',
+            }}>responding</strong> 24/7.
           </span>
         </h1>
 
