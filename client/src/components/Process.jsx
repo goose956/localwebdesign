@@ -6,7 +6,7 @@ const pillars = [
     title: 'Design',
     desc: "Most local businesses are stuck with a website that's gone stale — slow, outdated, and not doing them any favours. We design fantastic, modern sites built specifically around your brand, so you finally have something you're proud to send people to.",
     tags: ['Modern Design', 'Mobile-First', 'Brand-Matched'],
-    stat: null,
+    stat: { value: '75%', label: 'of visitors judge your credibility by your website design alone' },
     icon: (
       <>
         <rect x="3" y="4" width="18" height="16" rx="2" />
@@ -31,7 +31,7 @@ const pillars = [
     title: 'Agents',
     desc: "Your website keeps working after launch — building new pages automatically to grow your reach, chasing up review requests and following up with happy customers, and posting fresh content to your social media. All completely on autopilot.",
     tags: ['Auto-Generated Pages', 'Review Follow-Up', 'Social Media Autopilot'],
-    stat: null,
+    stat: { value: '76%', label: 'of customers will leave a review, simply by being asked' },
     icon: (
       <>
         <rect x="5" y="9" width="14" height="10" rx="2" />
