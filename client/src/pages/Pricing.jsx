@@ -369,6 +369,7 @@ export default function Pricing() {
 function IncludedSection() {
   const ref = useReveal();
   const perks = [
+    { icon: '🤖', title: '24/7 AI Assistant', desc: "Chats and answers calls around the clock, even when you can't — you're only notified when someone wants to book you." },
     { icon: '🎨', title: 'Custom Design',    desc: 'Every website is uniquely designed for your brand — no templates.' },
     { icon: '📱', title: 'Mobile First',      desc: 'Looks stunning and works perfectly on every device.' },
     { icon: '⚡', title: 'Lightning Fast',    desc: 'Optimised for speed — fast load times improve SEO and conversions.' },
@@ -382,7 +383,7 @@ function IncludedSection() {
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-14 reveal" ref={ref}>
           <p className="section-label mb-3">Included in Every Plan</p>
-          <h2 className="section-title">The <span className="gradient-text">Pixel&amp;Craft</span> Standard</h2>
+          <h2 className="section-title">The <span className="gradient-text">OpenTwentyFour</span> Standard</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {perks.map(({ icon, title, desc }, i) => {

@@ -16,13 +16,13 @@ export default function Footer() {
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-2 mb-4">
               <div className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-                style={{ background: 'var(--gradient)' }}>P&C</div>
+                style={{ background: 'var(--gradient)' }}>O24</div>
               <span className="font-display font-bold text-lg">
-                Pixel<span className="gradient-text">&amp;Craft</span>
+                Open<span className="gradient-text">TwentyFour</span>
               </span>
             </Link>
             <p className="text-sm leading-relaxed mb-6 max-w-sm" style={{ color: 'var(--text-secondary)' }}>
-              We design and build stunning websites that help businesses grow their online presence and convert visitors into loyal customers.
+              We design stunning websites for local businesses, then bring them into the AI age with a smart assistant that's always on duty — answering questions and taking calls 24/7.
             </p>
             <div className="flex gap-3">
               {['twitter', 'instagram', 'linkedin', 'facebook'].map(platform => (
@@ -55,7 +55,7 @@ export default function Footer() {
               Services
             </h4>
             <div className="flex flex-col gap-3">
-              {['New Business Websites', 'Website Redesigns', 'Local SEO & Visibility', 'Booking Systems', 'Professional Rebranding'].map(s => (
+              {['24/7 AI Assistant', 'New Business Websites', 'Website Redesigns', 'Local SEO & Visibility', 'Professional Rebranding'].map(s => (
                 <span key={s} className="text-sm" style={{ color: 'var(--text-secondary)' }}>{s}</span>
               ))}
             </div>
@@ -65,7 +65,7 @@ export default function Footer() {
         <div className="gradient-divider my-8" />
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-sm" style={{ color: 'var(--text-secondary)' }}>
-          <p>© {new Date().getFullYear()} Pixel&amp;Craft. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} OpenTwentyFour. All rights reserved.</p>
           <p>Crafted with ♥ for businesses that deserve better online.</p>
         </div>
       </div>

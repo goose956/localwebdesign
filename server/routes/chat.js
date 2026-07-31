@@ -15,7 +15,7 @@ router.post('/', async (req, res) => {
 
   // Ensure session row exists. client_site_id is only ever set on first creation (ON CONFLICT
   // DO NOTHING) — a session's tenant never changes mid-conversation. NULL means this is
-  // Pixel&Craft's own visitor chat, unchanged from before this column existed.
+  // OpenTwentyFour's own visitor chat, unchanged from before this column existed.
   db.prepare(`
     INSERT INTO chat_sessions (session_id, client_site_id, message_count, started_at, last_message_at)
     VALUES (?, ?, 0, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
@@ -35,7 +35,7 @@ router.post('/', async (req, res) => {
     content: String(m.content).slice(0, 800),
   }));
 
-  // API key: DB setting takes priority over environment variable — shared by both Pixel&Craft's
+  // API key: DB setting takes priority over environment variable — shared by both OpenTwentyFour's
   // own chat and every client site's, there is no per-client OpenAI key.
   const keyRow = db.prepare("SELECT value FROM site_settings WHERE key = 'openai_api_key'").get();
   const apiKey = keyRow?.value || process.env.OPENAI_API_KEY;
@@ -51,12 +51,12 @@ router.post('/', async (req, res) => {
   let systemPrompt;
 
   if (siteId) {
-    // ── Client demo site path — a Site Builder site, not Pixel&Craft itself ──────────────
+    // ── Client demo site path — a Site Builder site, not OpenTwentyFour itself ──────────────
     const client = db.prepare('SELECT * FROM clients WHERE site_id = ?').get(siteId);
 
     if (!client) {
       // Not synced yet (chat was enabled but the site hasn't been published since, or the
-      // sync call failed) — don't fall through to Pixel&Craft's own knowledge base, that
+      // sync call failed) — don't fall through to OpenTwentyFour's own knowledge base, that
       // would answer as the wrong business entirely.
       return res.json({
         sessionId: sid,
@@ -88,7 +88,7 @@ quick, accurate quote.
 Keep replies short (2-4 sentences), friendly, and always steer toward calling ${client.phone || 'us'}
 or leaving their details, since that's how the business actually converts enquiries.`;
   } else {
-    // ── Pixel&Craft's own chat — completely unchanged from before this feature existed ──
+    // ── OpenTwentyFour's own chat — completely unchanged from before this feature existed ──
     const knowledge = db.prepare(
       'SELECT category, title, content FROM chat_knowledge WHERE is_active = 1 ORDER BY sort_order ASC'
     ).all();
@@ -103,7 +103,7 @@ or leaving their details, since that's how the business actually converts enquir
     const conversationGoal = goalRow?.value ||
       'Guide the visitor towards choosing and signing up for one of our plans (Starter, Professional, or Enterprise) by directing them to the Pricing page.';
 
-    systemPrompt = `You are ${botName}, a friendly web design consultant working for Pixel&Craft. You chat with potential clients on the Pixel&Craft website.
+    systemPrompt = `You are ${botName}, a friendly web design consultant working for OpenTwentyFour. You chat with potential clients on the OpenTwentyFour website.
 
 YOUR PRIMARY GOAL:
 ${conversationGoal}
@@ -111,7 +111,7 @@ ${conversationGoal}
 Every conversation should naturally progress towards this goal. Once you understand the customer's needs, steer the conversation confidently in this direction.
 
 IMPORTANT — you represent the COMPANY, not yourself personally:
-- Always say "we", "us", "our team" when referring to Pixel&Craft. Never say "I'm based..." — say "We're based..."
+- Always say "we", "us", "our team" when referring to OpenTwentyFour. Never say "I'm based..." — say "We're based..."
 - Answer factual questions about the company directly and accurately using the knowledge base below
 - Do NOT be evasive. If someone asks where we are based, tell them the location clearly.
 

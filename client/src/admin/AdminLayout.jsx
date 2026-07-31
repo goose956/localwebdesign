@@ -40,7 +40,7 @@ export default function AdminLayout() {
           style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>P&C</div>
         <div>
           <p className="font-display font-bold text-sm text-white leading-none">Admin</p>
-          <p className="text-xs mt-0.5" style={{ color: '#475569' }}>Pixel&amp;Craft</p>
+          <p className="text-xs mt-0.5" style={{ color: '#475569' }}>OpenTwentyFour</p>
         </div>
       </div>
 

@@ -39,10 +39,10 @@ export default function Navbar() {
             className="w-9 h-9 rounded-lg flex items-center justify-center text-white font-bold text-sm"
             style={{ background: 'var(--gradient)' }}
           >
-            P&C
+            O24
           </div>
           <span className="font-display font-700 text-lg tracking-tight" style={{ color: 'var(--text-primary)' }}>
-            Pixel<span className="gradient-text">&amp;Craft</span>
+            Open<span className="gradient-text">TwentyFour</span>
           </span>
         </Link>
 

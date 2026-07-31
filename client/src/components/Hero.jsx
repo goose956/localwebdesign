@@ -33,19 +33,18 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-full text-sm mb-10"
           style={{ animationDelay: '0s' }}>
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span style={{ color: 'var(--text-secondary)' }}>Now taking new projects for 2025</span>
+          <span style={{ color: 'var(--text-secondary)' }}>Now taking new projects for 2026</span>
         </div>
 
         {/* Headline */}
         <h1 className="section-title mb-6" style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', lineHeight: 1.08 }}>
-          Transform Your<br />
-          <span className="gradient-text">Digital Presence</span><br />
-          Into a Masterpiece
+          Beautiful Websites.<br />
+          <span className="gradient-text">Open 24/7.</span>
         </h1>
 
         {/* Subline */}
         <p className="section-subtitle mx-auto mb-12" style={{ fontSize: '1.2rem', maxWidth: '640px' }}>
-          We help local service businesses get online and get found — with stunning websites that build trust and bring in more customers.
+          Your website just got smarter! We design stunning sites for local businesses — now paired with a friendly AI assistant that answers questions and takes calls around the clock, even when you can't. You only step in when someone's ready to become a customer.
         </p>
 
         {/* CTAs */}

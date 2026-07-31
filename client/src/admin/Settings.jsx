@@ -52,8 +52,8 @@ const FIELDS = [
     icon: '🏢',
     desc: 'Used by the AI chatbot when answering questions about contacting you.',
     fields: [
-      { key: 'company_name',  label: 'Company Name',  placeholder: 'Pixel&Craft',               type: 'text' },
-      { key: 'company_email', label: 'Email Address', placeholder: 'hello@pixelandcraft.co.uk',  type: 'text' },
+      { key: 'company_name',  label: 'Company Name',  placeholder: 'OpenTwentyFour',               type: 'text' },
+      { key: 'company_email', label: 'Email Address', placeholder: 'hello@opentwentyfour.co.uk',  type: 'text' },
       { key: 'company_phone', label: 'Phone Number',  placeholder: '+44 (0) 7700 900 123',        type: 'text' },
     ],
   },

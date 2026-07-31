@@ -40,12 +40,12 @@ const services = [
     icon: (
       <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
-          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
       </svg>
     ),
-    title: 'Booking & Enquiry Systems',
-    desc: 'Let customers book appointments or request quotes directly through your website — reducing phone time and keeping your diary full automatically.',
-    tags: ['Online Booking', 'Contact Forms', 'Automation'],
+    title: 'Your 24/7 AI Assistant',
+    desc: "Every website comes to life with a friendly AI assistant that chats with visitors and answers calls any time of day — even when you're on a job. We only text you when someone's ready to book.",
+    tags: ['Answers Calls & Chats', '24/7 Availability', 'Only Notified When It Matters'],
   },
 ];
 
@@ -62,7 +62,7 @@ export default function Services() {
             Built for <span className="gradient-text">Local Businesses</span>
           </h2>
           <p className="section-subtitle mx-auto">
-            We specialise in helping trades, hospitality, health &amp; beauty, and professional service businesses win more local customers online.
+            We specialise in helping trades, hospitality, health &amp; beauty, and professional service businesses win more local customers online — every website now comes with its own AI assistant working around the clock.
           </p>
         </div>
 

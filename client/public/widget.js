@@ -1,16 +1,16 @@
-/* Pixel&Craft chat widget — embedded on Site Builder demo sites via a single
+/* OpenTwentyFour chat widget — embedded on Site Builder demo sites via a single
  * <script src=".../widget.js?v=1" data-site-id="..." data-api-base="..." async> tag,
  * injected at publish time. Plain vanilla JS, no framework, no build step — Vite ships this
  * file byte-for-byte from client/public/ into client/dist/, served statically by the same
- * Express app that serves the Pixel&Craft marketing site and its API.
+ * Express app that serves the OpenTwentyFour marketing site and its API.
  *
  * Mirrors src/components/ChatWidget.jsx's visual design (bubble, slide-up panel, gradient
  * header, typing-dots) but themed via Site Builder's own CSS variable names (--sb-primary
  * etc, set by src/template/palettes.js on every generated site's wrapping element) instead of
- * Pixel&Craft's own theme variables — since this script runs INSIDE a demo site's own page,
+ * OpenTwentyFour's own theme variables — since this script runs INSIDE a demo site's own page,
  * where those variables are already in scope, it inherits that site's palette automatically
  * just by referencing the same names. Site Builder palettes have no pre-built gradient string
- * (unlike Pixel&Craft's own themes), so this builds its own 2-stop gradient from
+ * (unlike OpenTwentyFour's own themes), so this builds its own 2-stop gradient from
  * --sb-primary -> --sb-primary-dark wherever the original widget used var(--gradient).
  */
 (function () {
@@ -27,7 +27,7 @@
 
   // The <script> tag that loaded this file — used to read config attributes and, as a
   // fallback, to derive the API's origin from this script's own src (since it's served by the
-  // very same Pixel&Craft app the API lives on).
+  // very same OpenTwentyFour app the API lives on).
   var thisScript = document.currentScript;
   var apiBase = (thisScript && thisScript.getAttribute('data-api-base')) || '';
   if (!apiBase && thisScript && thisScript.src) {

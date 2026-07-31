@@ -1,6 +1,6 @@
-# Pixel&Craft — Web Design Company Website
+# OpenTwentyFour — Web Design Company Website
 
-A full-stack website for a web design company with a powerful admin panel.
+A full-stack website for a web design company with a powerful admin panel. Positioning: a web design company first (not an "AI agency" — deliberately, for Google Business Profile category purposes), with a 24/7 AI chat/voice assistant as the core differentiator woven into every site.
 
 ## Features
 
@@ -156,7 +156,7 @@ SQLite data and uploaded portfolio thumbnails are stored under `server/data/`. O
 ## Customisation
 
 ### Company Name
-Search and replace `Pixel&Craft` and `Pixel & Craft` throughout the codebase.
+The brand is `OpenTwentyFour`. Search and replace it (and the `O24` logo mark) throughout the codebase if it ever needs to change again.
 
 ### Pricing
 Edit `client/src/pages/Pricing.jsx` — the `plans` array at the top.

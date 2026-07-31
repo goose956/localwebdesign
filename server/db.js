@@ -157,7 +157,7 @@ db.exec(`
 
 // One-time migration for existing (already-deployed) databases — CREATE TABLE IF NOT EXISTS
 // above won't retroactively add a column to a chat_sessions table that already existed before
-// this column did. NULL means "Pixel&Craft's own visitor chat"; a real site_id means a Site
+// this column did. NULL means "OpenTwentyFour's own visitor chat"; a real site_id means a Site
 // Builder client's demo site.
 const chatSessionCols = db.prepare("PRAGMA table_info(chat_sessions)").all().map(c => c.name);
 if (!chatSessionCols.includes('client_site_id')) {
@@ -286,63 +286,69 @@ if (knowledgeCount.count === 0) {
   const entries = [
     {
       category: 'about',
-      title: 'About Pixel&Craft',
-      content: 'Pixel&Craft is a professional web design agency with over 8 years of experience. We specialise in creating stunning, high-performance websites for businesses of all sizes. We have delivered over 150 projects with a 98% client satisfaction rate. Our team is passionate about design and dedicated to helping businesses succeed online.',
+      title: 'About OpenTwentyFour',
+      content: 'OpenTwentyFour is a web design company that brings your website into the AI age. We design and build stunning, high-performance websites for local businesses of all sizes — and every site comes with its own AI assistant that chats with visitors and answers calls 24/7, even when you\'re not available. We have delivered over 150 projects with a 98% client satisfaction rate. We only get in touch when someone\'s ready to become a customer.',
       sort_order: 1
+    },
+    {
+      category: 'services',
+      title: '24/7 AI Website Assistant',
+      content: "Every website we build comes with a built-in AI assistant that chats with visitors and can answer phone calls any time of day — even when you're busy on a job or it's outside business hours. The assistant handles common questions and captures details from interested customers. You're only texted when someone's ready to book you for work, so routine enquiries never interrupt your day.",
+      sort_order: 2
     },
     {
       category: 'services',
       title: 'New Business Websites',
       content: "We build beautiful brand-new websites for businesses that don't have an online presence yet. This includes everything: strategy, design, development, mobile optimisation, contact forms, basic SEO, and Google Analytics setup. Perfect for small businesses, sole traders, and startups wanting to make a great first impression online.",
-      sort_order: 2
+      sort_order: 3
     },
     {
       category: 'services',
       title: 'Website Redesigns',
       content: 'Got an outdated or underperforming website? We transform existing websites into modern, high-converting digital experiences. We audit your current site, understand what needs improving, and rebuild it with fresh design, better performance, and improved SEO. Many clients see a significant increase in enquiries after a redesign.',
-      sort_order: 3
+      sort_order: 4
     },
     {
       category: 'services',
       title: 'E-Commerce Stores',
       content: 'We build full e-commerce stores that are designed to convert browsers into buyers. Includes product listings, shopping cart, secure payment integration, order management, and a clean admin area to manage your products. Great for businesses wanting to sell products or services online.',
-      sort_order: 4
+      sort_order: 5
     },
     {
       category: 'services',
       title: 'Landing Pages',
       content: 'High-converting landing pages for specific campaigns, product launches, or lead generation. Built with a clear focus on one goal — getting visitors to take action. Fast to build and extremely effective for paid advertising campaigns.',
-      sort_order: 5
+      sort_order: 6
     },
     {
       category: 'pricing',
       title: 'Starter Plan — £799',
       content: 'Our Starter plan is £799 (one-time fee). It includes: up to 5 pages, mobile-responsive design, contact form, basic on-page SEO, Google Analytics setup, 3 revision rounds, and 30-day post-launch support. Ideal for small businesses and sole traders just getting started online.',
-      sort_order: 6
+      sort_order: 7
     },
     {
       category: 'pricing',
       title: 'Professional Plan — £1,499 (Most Popular)',
       content: 'Our Professional plan is £1,499 (one-time fee) and is our most popular option. It includes: up to 10 pages, mobile-responsive design, contact form plus booking system, advanced on-page SEO, custom animations and interactions, blog/news section, Google Analytics and Search Console setup, 5 revision rounds, and 60-day post-launch support. Perfect for growing businesses that want to stand out.',
-      sort_order: 7
+      sort_order: 8
     },
     {
       category: 'pricing',
       title: 'Enterprise Plan — From £2,999',
       content: 'Our Enterprise plan starts from £2,999 (one-time fee, price varies by complexity). It includes: unlimited pages, e-commerce functionality, custom integrations and APIs, advanced animations, CMS for easy content editing, priority performance and SEO, unlimited revisions, 12-month priority support, and a dedicated project manager. For businesses that need the very best.',
-      sort_order: 8
+      sort_order: 9
     },
     {
       category: 'process',
       title: 'How We Work',
       content: 'Our process has 4 clear stages: 1) Discovery — we learn about your business, goals, and audience. 2) Design — we create pixel-perfect designs for your approval before any coding begins. 3) Development — we build your site with clean, fast, SEO-friendly code. 4) Launch — after thorough testing and your sign-off, we go live. Post-launch support is included in every plan.',
-      sort_order: 9
+      sort_order: 10
     },
     {
       category: 'faq',
       title: 'Common Questions',
       content: 'Q: How long does it take? A: Starter sites typically take 2-3 weeks, Professional 3-5 weeks, Enterprise 6-12 weeks. Q: Do I own my website? A: Yes, you own everything — code, content, and domain. Q: Do you need a deposit? A: We take a 50% deposit to begin, then the remainder on completion. Q: Can you help with hosting? A: Yes, we provide hosting recommendations and setup guidance. Q: What if I need changes after launch? A: All plans include post-launch support, and we offer ongoing maintenance packages.',
-      sort_order: 10
+      sort_order: 11
     }
   ];
   const insert = db.prepare('INSERT INTO chat_knowledge (category, title, content, sort_order) VALUES (?, ?, ?, ?)');
