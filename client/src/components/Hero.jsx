@@ -33,13 +33,18 @@ export default function Hero() {
         <div className="inline-flex items-center gap-2 glass px-5 py-2.5 rounded-full text-sm mb-10"
           style={{ animationDelay: '0s' }}>
           <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-          <span style={{ color: 'var(--text-secondary)' }}>Now taking new projects for 2026</span>
+          <span style={{ color: 'var(--text-secondary)' }}>
+            Your website working{' '}
+            <strong style={{ color: 'var(--text-primary)', fontWeight: 700 }}>even when you're not</strong>
+          </span>
         </div>
 
         {/* Headline */}
         <h1 className="section-title mb-6" style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', lineHeight: 1.08 }}>
           Beautiful Websites.<br />
-          <span className="gradient-text">Open 24/7.</span>
+          <span className="gradient-text">
+            Open &amp; <strong style={{ fontWeight: 900 }}>responding</strong> 24/7.
+          </span>
         </h1>
 
         {/* Subline */}
