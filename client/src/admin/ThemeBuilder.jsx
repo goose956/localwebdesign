@@ -11,6 +11,8 @@ const PRESET_KEYS = [
   { key: 'bgSecondary',  label: 'Background Alt',   desc: 'Section backgrounds' },
   { key: 'textPrimary',  label: 'Text Primary',     desc: 'Headings & body' },
   { key: 'textSecondary',label: 'Text Secondary',   desc: 'Captions & muted text' },
+  { key: 'border',       label: 'Border',           desc: 'Card & divider lines' },
+  { key: 'borderHover',  label: 'Border Hover',     desc: 'Hover / focus lines' },
 ];
 
 export default function ThemeBuilder() {

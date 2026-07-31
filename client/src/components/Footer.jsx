@@ -1,7 +1,7 @@
 import { Link } from 'react-router-dom';
 
 const FooterLink = ({ to, children }) => (
-  <Link to={to} className="block text-sm transition-colors duration-200 hover:text-white"
+  <Link to={to} className="block text-sm transition-colors duration-200 hover:text-[var(--primary)]"
     style={{ color: 'var(--text-secondary)' }}>
     {children}
   </Link>

@@ -15,6 +15,8 @@ const THEME_VARS = [
   ['gradient', '--gradient'],
   ['gradientBg', '--gradient-bg'],
   ['glow', '--glow'],
+  ['border', '--border'],
+  ['borderHover', '--border-hover'],
 ];
 
 export function ThemeProvider({ children }) {

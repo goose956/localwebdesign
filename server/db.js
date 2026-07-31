@@ -183,6 +183,20 @@ const themeCount = db.prepare('SELECT COUNT(*) as count FROM themes').get();
 if (themeCount.count === 0) {
   const themes = [
     {
+      name: 'Studio White',
+      slug: 'studio-white',
+      config: JSON.stringify({
+        primary: '#f97316', primaryDark: '#ea580c', secondary: '#6b7280',
+        accent: '#f59e0b', bgPrimary: '#ffffff', bgSecondary: '#f7f7f8',
+        bgCard: 'rgba(0,0,0,0.03)', textPrimary: '#18181b', textSecondary: '#52525b',
+        gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+        gradientBg: 'radial-gradient(ellipse at top, #fff7ed 0%, #ffffff 60%)',
+        glow: 'rgba(249, 115, 22, 0.25)',
+        border: 'rgba(0,0,0,0.08)', borderHover: 'rgba(0,0,0,0.18)'
+      }),
+      is_active: 1
+    },
+    {
       name: 'Midnight Purple',
       slug: 'midnight',
       config: JSON.stringify({
@@ -191,9 +205,10 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(255,255,255,0.05)', textPrimary: '#ffffff', textSecondary: '#a0a0b8',
         gradient: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #1a1040 0%, #0a0a14 60%)',
-        glow: 'rgba(99, 102, 241, 0.3)'
+        glow: 'rgba(99, 102, 241, 0.3)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
-      is_active: 1
+      is_active: 0
     },
     {
       name: 'Ocean Depths',
@@ -204,7 +219,8 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(6,182,212,0.07)', textPrimary: '#ffffff', textSecondary: '#94a3b8',
         gradient: 'linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #0c2040 0%, #030712 60%)',
-        glow: 'rgba(6, 182, 212, 0.3)'
+        glow: 'rgba(6, 182, 212, 0.3)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
       is_active: 0
     },
@@ -217,7 +233,8 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(16,185,129,0.07)', textPrimary: '#ffffff', textSecondary: '#94a3b8',
         gradient: 'linear-gradient(135deg, #10b981 0%, #06b6d4 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #0a2818 0%, #030d0a 60%)',
-        glow: 'rgba(16, 185, 129, 0.3)'
+        glow: 'rgba(16, 185, 129, 0.3)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
       is_active: 0
     },
@@ -230,7 +247,8 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(249,115,22,0.07)', textPrimary: '#ffffff', textSecondary: '#d4a899',
         gradient: 'linear-gradient(135deg, #f97316 0%, #ec4899 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #2a1008 0%, #0d0806 60%)',
-        glow: 'rgba(249, 115, 22, 0.3)'
+        glow: 'rgba(249, 115, 22, 0.3)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
       is_active: 0
     },
@@ -243,7 +261,8 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(244,63,94,0.07)', textPrimary: '#ffffff', textSecondary: '#c4a0a8',
         gradient: 'linear-gradient(135deg, #f43f5e 0%, #a855f7 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #2a0818 0%, #0d0507 60%)',
-        glow: 'rgba(244, 63, 94, 0.3)'
+        glow: 'rgba(244, 63, 94, 0.3)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
       is_active: 0
     },
@@ -256,13 +275,49 @@ if (themeCount.count === 0) {
         bgCard: 'rgba(255,255,255,0.04)', textPrimary: '#ffffff', textSecondary: '#94a3b8',
         gradient: 'linear-gradient(135deg, #e2e8f0 0%, #94a3b8 100%)',
         gradientBg: 'radial-gradient(ellipse at top, #1e2a3a 0%, #020617 60%)',
-        glow: 'rgba(226, 232, 240, 0.2)'
+        glow: 'rgba(226, 232, 240, 0.2)',
+        border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.18)'
       }),
       is_active: 0
     }
   ];
   const insert = db.prepare('INSERT INTO themes (name, slug, config, is_active, is_preset) VALUES (?, ?, ?, ?, 1)');
   themes.forEach(t => insert.run(t.name, t.slug, t.config, t.is_active));
+}
+
+// Retroactive migration for already-seeded (pre-existing) databases — CREATE/seed above only
+// runs once when the themes table is first created, so an already-deployed DB never sees new
+// presets added later. Insert "Studio White" if missing and make it the active theme; also
+// backfill border/borderHover into any existing theme configs that predate those two fields
+// (ThemeContext only overrides CSS vars a theme's config actually defines, so a theme missing
+// them would silently keep whatever the previous active theme had left in the DOM).
+const studioWhite = db.prepare("SELECT id FROM themes WHERE slug = 'studio-white'").get();
+if (!studioWhite) {
+  const insertOne = db.prepare('INSERT INTO themes (name, slug, config, is_active, is_preset) VALUES (?, ?, ?, 0, 1)');
+  const { lastInsertRowid } = insertOne.run('Studio White', 'studio-white', JSON.stringify({
+    primary: '#f97316', primaryDark: '#ea580c', secondary: '#6b7280',
+    accent: '#f59e0b', bgPrimary: '#ffffff', bgSecondary: '#f7f7f8',
+    bgCard: 'rgba(0,0,0,0.03)', textPrimary: '#18181b', textSecondary: '#52525b',
+    gradient: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+    gradientBg: 'radial-gradient(ellipse at top, #fff7ed 0%, #ffffff 60%)',
+    glow: 'rgba(249, 115, 22, 0.25)',
+    border: 'rgba(0,0,0,0.08)', borderHover: 'rgba(0,0,0,0.18)'
+  }));
+  db.prepare('UPDATE themes SET is_active = 0').run();
+  db.prepare('UPDATE themes SET is_active = 1 WHERE id = ?').run(lastInsertRowid);
+}
+for (const row of db.prepare('SELECT id, config FROM themes').all()) {
+  const config = JSON.parse(row.config);
+  if (!config.border) {
+    // Luminance check so a border colour that reads on the theme's own background isn't
+    // hardcoded to a specific hex — a future custom light theme gets a dark border too.
+    const hex = (config.bgPrimary || '#000000').replace('#', '');
+    const r = parseInt(hex.slice(0, 2), 16) || 0, g = parseInt(hex.slice(2, 4), 16) || 0, b = parseInt(hex.slice(4, 6), 16) || 0;
+    const isLight = (r * 299 + g * 587 + b * 114) / 1000 > 128;
+    config.border = isLight ? 'rgba(0,0,0,0.08)' : 'rgba(255,255,255,0.08)';
+    config.borderHover = isLight ? 'rgba(0,0,0,0.18)' : 'rgba(255,255,255,0.18)';
+    db.prepare('UPDATE themes SET config = ? WHERE id = ?').run(JSON.stringify(config), row.id);
+  }
 }
 
 // Seed sample reviews

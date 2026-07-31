@@ -27,7 +27,7 @@ export default function Navbar() {
     <header
       className="fixed top-0 left-0 right-0 z-50 transition-all duration-300"
       style={{
-        background: scrolled ? 'rgba(10,10,20,0.85)' : 'transparent',
+        background: scrolled ? 'color-mix(in srgb, var(--bg-primary) 85%, transparent)' : 'transparent',
         backdropFilter: scrolled ? 'blur(20px)' : 'none',
         borderBottom: scrolled ? '1px solid var(--border)' : '1px solid transparent',
       }}
@@ -93,7 +93,7 @@ export default function Navbar() {
       {open && (
         <div
           className="md:hidden px-6 pb-6 pt-2 flex flex-col gap-2"
-          style={{ background: 'rgba(10,10,20,0.95)', borderBottom: '1px solid var(--border)' }}
+          style={{ background: 'color-mix(in srgb, var(--bg-primary) 95%, transparent)', borderBottom: '1px solid var(--border)' }}
         >
           {navLinks.map(({ to, label }) => (
             <Link

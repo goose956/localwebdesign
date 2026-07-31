@@ -182,8 +182,8 @@ export default function Contact() {
                             onFocus={e => e.target.style.borderColor = 'var(--primary)'}
                             onBlur={e => e.target.style.borderColor = 'var(--border)'}
                           >
-                            <option value="" style={{ background: '#13131f' }}>Select a service…</option>
-                            {services.map(s => <option key={s} value={s} style={{ background: '#13131f' }}>{s}</option>)}
+                            <option value="" style={{ background: 'var(--bg-secondary)' }}>Select a service…</option>
+                            {services.map(s => <option key={s} value={s} style={{ background: 'var(--bg-secondary)' }}>{s}</option>)}
                           </select>
                         </FormField>
                       </div>

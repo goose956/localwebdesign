@@ -6,20 +6,20 @@
 
 /* ── Theme CSS Variables (overridden per active theme) ── */
 :root {
-  --primary:      #6366f1;
-  --primary-dark: #4f46e5;
-  --secondary:    #8b5cf6;
+  --primary:      #f97316;
+  --primary-dark: #ea580c;
+  --secondary:    #6b7280;
   --accent:       #f59e0b;
-  --bg-primary:   #0a0a14;
-  --bg-secondary: #13131f;
-  --bg-card:      rgba(255, 255, 255, 0.05);
-  --text-primary:   #ffffff;
-  --text-secondary: #a0a0b8;
-  --gradient:     linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #a855f7 100%);
-  --gradient-bg:  radial-gradient(ellipse at top, #1a1040 0%, #0a0a14 60%);
-  --border:       rgba(255, 255, 255, 0.08);
-  --border-hover: rgba(255, 255, 255, 0.18);
-  --glow:         rgba(99, 102, 241, 0.3);
+  --bg-primary:   #ffffff;
+  --bg-secondary: #f7f7f8;
+  --bg-card:      rgba(0, 0, 0, 0.03);
+  --text-primary:   #18181b;
+  --text-secondary: #52525b;
+  --gradient:     linear-gradient(135deg, #f97316 0%, #ea580c 100%);
+  --gradient-bg:  radial-gradient(ellipse at top, #fff7ed 0%, #ffffff 60%);
+  --border:       rgba(0, 0, 0, 0.08);
+  --border-hover: rgba(0, 0, 0, 0.18);
+  --glow:         rgba(249, 115, 22, 0.25);
 }
 
 /* ── Base ── */
@@ -194,8 +194,8 @@ body {
 /* ── Grid overlay ── */
 .grid-overlay {
   background-image:
-    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
   background-size: 48px 48px;
   pointer-events: none;
 }
