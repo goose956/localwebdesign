@@ -112,60 +112,54 @@ function PlanModal({ plan, onClose }) {
   );
 }
 
-// Monthly = spread over 6 months (includes ~20% premium for flexibility)
-// Yearly  = one-off upfront — shown as per/month equivalent so user can compare
+// Ongoing monthly service, not a one-off build cost — Monthly = pay-as-you-go; Yearly = paid
+// upfront for the year at ~15% off (still a subscription, just billed annually, unlike the
+// old one-off/ownership framing this replaced).
 const plans = [
   {
-    name: 'Starter',
-    tagline: 'Perfect for getting online',
-    desc: 'Ideal for local businesses and sole traders who need a professional website fast.',
-    monthly: { amount: '80',  total: '960',   label: '12 monthly payments · Total £960' },
-    yearly:  { amount: '67',  total: '799',   label: 'One-off payment of £799', saving: '£161', savingPct: '17%' },
-    features: [
-      'Up to 5 pages',
-      'Mobile-responsive design',
-      'Contact form',
-      'Basic on-page SEO & Google listing',
-      'Google Analytics setup',
-      '3 revision rounds',
+    name: 'Starter AI',
+    tagline: 'Never miss an enquiry',
+    desc: 'A beautiful website plus an AI chat assistant that captures every enquiry — perfect for getting started.',
+    monthly: { amount: '40', label: 'Billed monthly' },
+    yearly:  { amount: '34', label: 'Billed annually · £408 total', saving: '£72', savingPct: '15%' },
+    groups: [
+      { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
+      { title: 'Respond', items: ['AI chat assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
+      { title: 'Hosting', items: ['Unlimited AI chat responses', 'Full web support'] },
     ],
-    notIncluded: [],
     cta: 'Get Started',
     popular: false,
   },
   {
-    name: 'Professional',
-    tagline: 'Most popular',
-    desc: 'The complete package for local businesses that want to stand out and win more customers.',
-    monthly: { amount: '150', total: '1,800', label: '12 monthly payments · Total £1,800' },
-    yearly:  { amount: '125', total: '1,499', label: 'One-off payment of £1,499', saving: '£301', savingPct: '17%' },
-    features: [
-      'Up to 10 pages',
-      'Mobile-responsive design',
-      'Contact form + booking system',
-      'Advanced local SEO',
-      'Custom animations & interactions',
-      'Blog / News section',
+    name: 'Voice Receptionist AI',
+    tagline: 'Chat & voice',
+    desc: 'Everything in Starter, plus a real AI voice receptionist that answers your phone around the clock.',
+    monthly: { amount: '130', label: 'Billed monthly' },
+    yearly:  { amount: '110', label: 'Billed annually · £1,320 total', saving: '£240', savingPct: '15%' },
+    groups: [
+      { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
+      { title: 'Respond', items: ['AI chat AND voice assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
+      { title: 'Hosting', items: ['Unlimited AI chat responses', '200 minutes/month voice agent credits', 'Full web support'] },
     ],
-    notIncluded: [],
     cta: 'Get Started',
     popular: true,
   },
   {
-    name: 'Enterprise',
-    tagline: 'For ambitious businesses',
-    desc: 'Fully bespoke builds for businesses that want everything done properly, end to end.',
-    monthly: { amount: '300', total: '3,600', label: 'From 12 monthly payments · Total from £3,600', prefix: 'from' },
-    yearly:  { amount: '250', total: '2,999', label: 'One-off payment from £2,999', saving: 'from £601', savingPct: '17%', prefix: 'from' },
-    features: [
-      'Unlimited pages',
-      'Advanced booking & enquiry systems',
-      'Custom integrations & automations',
-      'Advanced animations',
-      'CMS for easy content editing',
-      'Priority local SEO',
+    name: 'Voice AI & Agent',
+    tagline: 'Full autopilot growth',
+    desc: 'Everything in Voice Receptionist, plus an AI agent that chases reviews, creates content, and posts to social — all on autopilot.',
+    monthly: { amount: '499', label: 'Billed monthly' },
+    yearly:  { amount: '424', label: 'Billed annually · £5,088 total', saving: '£900', savingPct: '15%' },
+    groups: [
+      { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
+      { title: 'Respond', items: ['AI chat AND voice assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
+      { title: 'Agent', items: [
+        'Asks for and follows up reviews with customers (big for local search ranking)',
+        'Creates content on autopilot to dominate local search',
+        'Auto-posts to social media to showcase your latest work',
+      ] },
+      { title: 'Hosting', items: ['Unlimited AI chat responses', '200 minutes/month voice agent credits', 'Full web support'] },
     ],
-    notIncluded: [],
     cta: "Let's Talk",
     popular: false,
   },
@@ -174,12 +168,6 @@ const plans = [
 const CheckIcon = () => (
   <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-  </svg>
-);
-
-const CrossIcon = () => (
-  <svg className="w-4 h-4 flex-shrink-0 mt-0.5 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
   </svg>
 );
 
@@ -214,9 +202,6 @@ function PricingCard({ plan, billing, delay, onSelect }) {
 
       {/* Price block */}
       <div className="mb-5">
-        {pricing.prefix && (
-          <p className="text-xs mb-0.5" style={{ color: 'var(--text-secondary)' }}>{pricing.prefix}</p>
-        )}
         <div className="flex items-end gap-1 mb-1">
           <span className="font-display font-bold" style={{ fontSize: '3rem', lineHeight: 1, color: 'var(--text-primary)' }}>
             £{pricing.amount}
@@ -235,28 +220,31 @@ function PricingCard({ plan, billing, delay, onSelect }) {
           <svg className="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
           </svg>
-          Save {pricing.saving} vs monthly · No subscription
+          Save {pricing.saving}/yr vs paying monthly
         </div>
       )}
 
       {!isYearly && (
         <div className="mb-5 px-3 py-2 rounded-xl text-xs font-medium"
           style={{ background: 'rgba(99,102,241,0.07)', color: 'var(--text-secondary)', border: '1px solid var(--border)' }}>
-          💡 Switch to Yearly to save {plan.yearly.saving}
+          💡 Pay yearly to save {plan.yearly.saving}/yr ({plan.yearly.savingPct} off)
         </div>
       )}
 
-      <div className="flex flex-col gap-3 mb-8 flex-1">
-        {plan.features.map(f => (
-          <div key={f} className="flex items-start gap-3 text-sm" style={{ color: 'var(--text-primary)' }}>
-            <span style={{ color: 'var(--primary)' }}><CheckIcon /></span>
-            {f}
-          </div>
-        ))}
-        {plan.notIncluded.map(f => (
-          <div key={f} className="flex items-start gap-3 text-sm" style={{ color: 'var(--text-secondary)' }}>
-            <CrossIcon />
-            {f}
+      <div className="flex flex-col gap-5 mb-8 flex-1">
+        {plan.groups.map(group => (
+          <div key={group.title}>
+            <p className="text-xs font-bold uppercase tracking-wide mb-2.5" style={{ color: 'var(--primary)' }}>
+              {group.title}
+            </p>
+            <div className="flex flex-col gap-2.5">
+              {group.items.map(item => (
+                <div key={item} className="flex items-start gap-3 text-sm" style={{ color: 'var(--text-primary)' }}>
+                  <span style={{ color: 'var(--primary)' }}><CheckIcon /></span>
+                  {item}
+                </div>
+              ))}
+            </div>
           </div>
         ))}
       </div>
@@ -336,23 +324,23 @@ export default function Pricing() {
               {billing === 'yearly' ? (
                 <div className="text-center px-5 py-3.5 rounded-2xl text-sm"
                   style={{ background: 'rgba(16,185,129,0.08)', color: '#6ee7b7', border: '1px solid rgba(16,185,129,0.15)' }}>
-                  <strong>Yearly (one-off payment)</strong> — a single upfront fee. No monthly bills, no subscriptions. You own your website outright from day one.
+                  <strong>Yearly</strong> — pay upfront for the year and save ~15% vs monthly. Still an ongoing plan, just billed annually.
                 </div>
               ) : (
                 <div className="text-center px-5 py-3.5 rounded-2xl text-sm"
                   style={{ background: 'rgba(99,102,241,0.08)', color: '#a5b4fc', border: '1px solid rgba(99,102,241,0.15)' }}>
-                  <strong>Monthly</strong> — pay in 12 equal monthly instalments. Same great service, easier on cash flow.
+                  <strong>Monthly</strong> — pay month to month, cancel any time. Same plan, easier on cash flow.
                 </div>
               )}
             </div>
 
             <div className="mt-14 text-center reveal" ref={ref}>
               <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-                All prices exclude ongoing hosting and domain costs.{' '}
+                Hosting and web support are included in every plan.{' '}
                 <Link to="/contact" className="font-semibold hover:underline" style={{ color: 'var(--primary)' }}>
                   Get in touch
                 </Link>{' '}
-                for a custom quote tailored to your business.
+                if you need something custom beyond these plans.
               </p>
             </div>
           </div>
@@ -369,7 +357,7 @@ export default function Pricing() {
 function IncludedSection() {
   const ref = useReveal();
   const perks = [
-    { icon: '🤖', title: '24/7 AI Assistant', desc: "Chats and answers calls around the clock, even when you can't — you're only notified when someone wants to book you." },
+    { icon: '🤖', title: '24/7 AI Chat', desc: "Chats with visitors around the clock, even when you can't — you're only notified when someone wants to book you." },
     { icon: '🎨', title: 'Custom Design',    desc: 'Every website is uniquely designed for your brand — no templates.' },
     { icon: '📱', title: 'Mobile First',      desc: 'Looks stunning and works perfectly on every device.' },
     { icon: '⚡', title: 'Lightning Fast',    desc: 'Optimised for speed — fast load times improve SEO and conversions.' },

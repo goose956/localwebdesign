@@ -377,20 +377,20 @@ if (knowledgeCount.count === 0) {
     },
     {
       category: 'pricing',
-      title: 'Starter Plan — £799',
-      content: 'Our Starter plan is £799 (one-time fee). It includes: up to 5 pages, mobile-responsive design, contact form, basic on-page SEO, Google Analytics setup, 3 revision rounds, and 30-day post-launch support. Ideal for small businesses and sole traders just getting started online.',
+      title: 'Starter AI — £40/month',
+      content: "Our Starter AI plan is £40/month (or £34/month if paid annually, £408/year — a 15% saving). It includes: a beautiful, professionally designed website, an AI chat assistant that answers visitor questions, and never missing a job — any enquiry is texted direct to your mobile. Hosting includes unlimited AI chat responses and full web support. Perfect for getting online and never missing an enquiry.",
       sort_order: 7
     },
     {
       category: 'pricing',
-      title: 'Professional Plan — £1,499 (Most Popular)',
-      content: 'Our Professional plan is £1,499 (one-time fee) and is our most popular option. It includes: up to 10 pages, mobile-responsive design, contact form plus booking system, advanced on-page SEO, custom animations and interactions, blog/news section, Google Analytics and Search Console setup, 5 revision rounds, and 60-day post-launch support. Perfect for growing businesses that want to stand out.',
+      title: 'Voice Receptionist AI — £130/month (Most Popular)',
+      content: "Our Voice Receptionist AI plan is £130/month (or £110/month if paid annually, £1,320/year — a 15% saving) and is our most popular option. It includes everything in Starter AI, plus the AI assistant can now answer phone calls with a real voice, not just chat — so the business never misses a call any time of day. Hosting includes unlimited AI chat responses, 200 minutes/month of voice agent credits, and full web support.",
       sort_order: 8
     },
     {
       category: 'pricing',
-      title: 'Enterprise Plan — From £2,999',
-      content: 'Our Enterprise plan starts from £2,999 (one-time fee, price varies by complexity). It includes: unlimited pages, e-commerce functionality, custom integrations and APIs, advanced animations, CMS for easy content editing, priority performance and SEO, unlimited revisions, 12-month priority support, and a dedicated project manager. For businesses that need the very best.',
+      title: 'Voice AI & Agent — £499/month',
+      content: "Our Voice AI & Agent plan is £499/month (or £424/month if paid annually, £5,088/year — a 15% saving). It includes everything in Voice Receptionist AI, plus an AI agent that works on autopilot: it asks for and follows up reviews with customers (important for local search ranking), creates content to help dominate local search, and auto-posts to social media to showcase the business's latest work. For businesses that want full autopilot growth.",
       sort_order: 9
     },
     {
