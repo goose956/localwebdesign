@@ -390,7 +390,7 @@ if (knowledgeCount.count === 0) {
     {
       category: 'pricing',
       title: 'Voice AI & Agent — £499/month',
-      content: "Our Voice AI & Agent plan is £499/month (or £424/month if paid annually, £5,088/year — a 15% saving). It includes everything in Voice Receptionist AI, plus an AI agent that works on autopilot: it asks for and follows up reviews with customers (important for local search ranking), creates content to help dominate local search, and auto-posts to social media to showcase the business's latest work. For businesses that want full autopilot growth.",
+      content: "Our Voice AI & Agent plan is £499/month (or £424/month if paid annually, £5,088/year — a 15% saving). It includes everything in Voice Receptionist AI, plus an AI agent that works on autopilot: it asks for and follows up reviews with customers (important for local search ranking), creates content to help dominate local search, and auto-posts to social media to showcase the business's latest work. Voice agent credits are higher on this plan — 1000 minutes/month, not the 200 minutes/month on Voice Receptionist AI. For businesses that want full autopilot growth.",
       sort_order: 9
     },
     {

@@ -158,7 +158,7 @@ const plans = [
         'Creates content on autopilot to dominate local search',
         'Auto-posts to social media to showcase your latest work',
       ] },
-      { title: 'Hosting', items: ['Unlimited AI chat responses', '200 minutes/month voice agent credits', 'Full web support'] },
+      { title: 'Hosting', items: ['Unlimited AI chat responses', '1000 minutes/month voice agent credits', 'Full web support'] },
     ],
     cta: "Let's Talk",
     popular: false,
