@@ -29,10 +29,17 @@ const contactLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: {
 const chatLimiter    = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many chat messages, please slow down.' } });
 const siteSyncLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many sync requests, please slow down.' } });
 
+// CUSTOM_DOMAINS (comma-separated, no protocol — e.g. "opentwentyfour.co.uk,www.opentwentyfour.co.uk")
+// lets a custom domain added in Railway start working again with just an env var + redeploy,
+// not a code change each time. Covers both the bare domain and a www. variant automatically.
+const customDomainOrigins = (process.env.CUSTOM_DOMAINS || 'opentwentyfour.co.uk,www.opentwentyfour.co.uk')
+  .split(',').map(d => d.trim()).filter(Boolean).map(d => `https://${d}`);
+
 const allowedOrigins = [
   process.env.CLIENT_URL || 'http://localhost:5173',
   'http://localhost:5000',
-  /\.railway\.app$/
+  /\.railway\.app$/,
+  ...customDomainOrigins,
 ];
 
 const strictCors = cors({
