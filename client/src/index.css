@@ -167,6 +167,30 @@ body {
   animation: float 16s ease-in-out infinite 2s;
 }
 
+/* ── Reviews marquee — single-row auto-scrolling strip ── */
+.reviews-marquee-mask {
+  width: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+}
+.reviews-marquee-track {
+  display: flex;
+  gap: 24px;
+  padding: 4px 0 4px 24px;
+  animation-name: marquee-scroll;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform;
+}
+.reviews-marquee-mask:hover .reviews-marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
 /* ── Grid overlay ── */
 .grid-overlay {
   background-image:

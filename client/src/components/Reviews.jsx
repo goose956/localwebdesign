@@ -29,6 +29,14 @@ export default function Reviews() {
 
   if (!reviews.length) return null;
 
+  // Duplicated once so the strip can loop seamlessly — the CSS animation slides exactly one
+  // copy's width (-50% of the doubled track) then resets instantly, which is imperceptible
+  // since the visual content at that reset point is identical to where it started.
+  const track = [...reviews, ...reviews];
+  // Roughly constant per-card pace regardless of how many reviews exist, rather than a fixed
+  // duration that would feel rushed with 3 reviews and glacial with 15.
+  const durationSec = Math.max(reviews.length * 6, 18);
+
   return (
     <section className="py-28 relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-7xl mx-auto px-6">
@@ -41,11 +49,18 @@ export default function Reviews() {
             Don't just take our word for it — hear from the businesses we've helped grow.
           </p>
         </div>
+      </div>
 
-        {/* Balanced 3-column grid — equal height rows */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {reviews.map((r, i) => (
-            <ReviewCard key={r.id} review={r} delay={i * 60} />
+      {/* Full-bleed single-row marquee — deliberately outside the max-w-7xl wrapper above so the
+          edges fade into the page rather than hard-cutting mid-card. Pauses on hover so a card
+          that catches someone's eye doesn't keep sliding away while they're reading it. */}
+      <div className="reviews-marquee-mask">
+        <div
+          className="reviews-marquee-track"
+          style={{ animationDuration: `${durationSec}s`, width: `${track.length * 344}px` }}
+        >
+          {track.map((r, i) => (
+            <ReviewCard key={`${r.id}-${i}`} review={r} />
           ))}
         </div>
       </div>
@@ -53,13 +68,11 @@ export default function Reviews() {
   );
 }
 
-function ReviewCard({ review, delay }) {
-  const ref = useReveal();
+function ReviewCard({ review }) {
   return (
     <div
-      className="glass glass-hover rounded-2xl p-7 flex flex-col reveal"
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
+      className="glass rounded-2xl p-7 flex flex-col flex-shrink-0"
+      style={{ width: 320 }}
     >
       {/* Quote mark */}
       <div className="text-5xl leading-none font-serif mb-4 select-none" style={{ color: 'var(--primary)', opacity: 0.4 }}>"</div>
