@@ -362,7 +362,6 @@ function IncludedSection() {
     { icon: '📱', title: 'Mobile First',      desc: 'Looks stunning and works perfectly on every device.' },
     { icon: '⚡', title: 'Lightning Fast',    desc: 'Optimised for speed — fast load times improve SEO and conversions.' },
     { icon: '🔍', title: 'SEO Ready',         desc: 'Built with search engines in mind from the very start.' },
-    { icon: '🛡️', title: 'Secure & Safe',     desc: 'SSL, secure code practices and regular updates included.' },
     { icon: '🤝', title: 'Ongoing Support',   desc: "We're here after launch too — not just during the build." },
   ];
 
