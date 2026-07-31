@@ -38,7 +38,7 @@ export default function Reviews() {
   const durationSec = Math.max(reviews.length * 6, 18);
 
   return (
-    <section className="py-28 relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+    <section className="pt-14 pb-28 relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16 reveal" ref={ref}>
           <p className="section-label mb-3">Testimonials</p>

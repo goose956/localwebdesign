@@ -56,7 +56,7 @@ export default function Process() {
   const ref = useReveal();
 
   return (
-    <section className="py-28 relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
+    <section className="pt-28 pb-14 relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
       <div className="max-w-7xl mx-auto px-6">
         <div className="text-center mb-16 reveal" ref={ref}>
           <p className="section-label mb-3">How We Work</p>
