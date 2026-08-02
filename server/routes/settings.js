@@ -5,7 +5,7 @@ const { verifyToken } = require('../middleware/auth');
 const router = express.Router();
 
 // Sensitive keys that must never be returned in plaintext
-const SENSITIVE = ['openai_api_key', 'emailoctopus_api_key'];
+const SENSITIVE = ['openai_api_key', 'emailoctopus_api_key', 'stripe_secret_key', 'stripe_webhook_secret'];
 
 const mask = (key, value) => {
   if (!SENSITIVE.includes(key) || !value) return value;
@@ -37,6 +37,7 @@ router.put('/:key', verifyToken, (req, res) => {
     'openai_api_key', 'company_name', 'company_email', 'company_phone',
     'chatbot_name', 'chatbot_greeting', 'chatbot_goal',
     'emailoctopus_api_key', 'emailoctopus_list_id', 'emailoctopus_list_name', 'emailoctopus_enabled',
+    'stripe_secret_key', 'stripe_webhook_secret',
   ];
   if (!ALLOWED_KEYS.includes(key)) {
     return res.status(400).json({ error: 'Unknown setting key' });

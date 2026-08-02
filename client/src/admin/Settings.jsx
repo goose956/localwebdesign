@@ -253,12 +253,154 @@ export default function Settings() {
         ))}
 
         {/* Security note */}
+        <StripeSection settings={settings} onSave={load} />
         <EmailOctopusSection settings={settings} onSave={load} />
 
         <div className="rounded-xl p-4 flex items-start gap-3" style={{ background: 'rgba(15,23,42,0.8)', border: '1px solid rgba(255,255,255,0.04)' }}>
           <span className="text-lg flex-shrink-0">🔒</span>
           <p className="text-xs leading-relaxed" style={{ color: '#334155' }}>
             Sensitive values like API keys are stored in your server database and never sent to the browser. They are masked in this interface after saving. Your OpenAI key is only used server-side to power the chat.
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Stripe dedicated section ── */
+function StripeSection({ settings, onSave }) {
+  const secretKey = settings['stripe_secret_key'];
+  const webhookSecret = settings['stripe_webhook_secret'];
+  const isConfigured = secretKey?.isSet && webhookSecret?.isSet;
+
+  const [editing, setEditing] = useState({}); // key -> value
+  const [saving, setSaving]   = useState(false);
+  const [msg, setMsg]         = useState('');
+
+  const flash = (m) => { setMsg(m); setTimeout(() => setMsg(''), 3000); };
+
+  const fields = [
+    { key: 'stripe_secret_key',     label: 'Secret Key',             placeholder: 'sk_live_… or sk_test_…' },
+    { key: 'stripe_webhook_secret', label: 'Webhook Signing Secret', placeholder: 'whsec_…' },
+  ];
+
+  const startEdit  = (key) => setEditing(p => ({ ...p, [key]: '' }));
+  const cancelEdit = (key) => setEditing(p => { const n = { ...p }; delete n[key]; return n; });
+
+  const save = async (key) => {
+    setSaving(true);
+    try {
+      await api.put(`/settings/${key}`, { value: editing[key] || '' });
+      cancelEdit(key);
+      await onSave();
+      flash('Saved ✓');
+    } catch (err) { flash(err.message); }
+    setSaving(false);
+  };
+
+  const clear = async (key) => {
+    if (!confirm('Clear this key?')) return;
+    await api.delete(`/settings/${key}`).catch(() => {});
+    await onSave();
+  };
+
+  const webhookUrl = `${window.location.origin}/api/stripe/webhook`;
+
+  return (
+    <div className="admin-card">
+      <div className="flex items-center gap-3 mb-2">
+        <span className="text-2xl">💳</span>
+        <div className="flex-1">
+          <h2 className="font-semibold text-white text-base">Stripe</h2>
+          <p className="text-xs" style={{ color: '#475569' }}>
+            Connect Stripe so customers can pay for a plan straight from the Pricing page.
+          </p>
+        </div>
+        {isConfigured && (
+          <span className="text-xs px-2.5 py-1 rounded-full font-semibold flex-shrink-0"
+            style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}>
+            Connected
+          </span>
+        )}
+      </div>
+
+      {msg && (
+        <p className="text-xs font-semibold mb-3 mt-1" style={{ color: msg.includes('✓') ? '#34d399' : '#f87171' }}>{msg}</p>
+      )}
+
+      <div className="mt-5 flex flex-col gap-5" style={{ borderTop: '1px solid rgba(255,255,255,0.05)', paddingTop: '1.25rem' }}>
+        {fields.map(f => {
+          const s = settings[f.key];
+          const isSet = s?.isSet;
+          const isEditing = f.key in editing;
+          return (
+            <div key={f.key}>
+              <label className="admin-label">{f.label}</label>
+              {!isEditing ? (
+                <div className="flex items-center gap-3 flex-wrap">
+                  <div className="flex-1 admin-input flex items-center gap-2" style={{ minHeight: 42 }}>
+                    {isSet ? (
+                      <>
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#10b981' }} />
+                        <span className="font-mono text-sm" style={{ color: '#94a3b8' }}>{s.value}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: '#475569' }} />
+                        <span className="text-sm italic" style={{ color: '#475569' }}>Not set</span>
+                      </>
+                    )}
+                  </div>
+                  <button onClick={() => startEdit(f.key)}
+                    className="px-4 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
+                    style={{ background: 'rgba(99,102,241,0.15)', color: '#a5b4fc' }}>
+                    {isSet ? 'Update' : 'Set'}
+                  </button>
+                  {isSet && (
+                    <button onClick={() => clear(f.key)}
+                      className="px-3 py-2 rounded-xl text-sm font-semibold flex-shrink-0"
+                      style={{ background: 'rgba(239,68,68,0.1)', color: '#f87171' }}>
+                      Clear
+                    </button>
+                  )}
+                </div>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <input
+                    className="admin-input w-full" type="password" autoFocus autoComplete="off"
+                    value={editing[f.key]} placeholder={f.placeholder}
+                    onChange={e => setEditing(p => ({ ...p, [f.key]: e.target.value }))}
+                  />
+                  <div className="flex gap-2">
+                    <button onClick={() => save(f.key)} disabled={saving}
+                      className="px-4 py-2 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
+                      style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)' }}>
+                      {saving ? 'Saving…' : 'Save'}
+                    </button>
+                    <button onClick={() => cancelEdit(f.key)}
+                      className="px-4 py-2 rounded-xl text-sm font-semibold"
+                      style={{ background: '#1e293b', color: '#94a3b8' }}>
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+
+        <div>
+          <label className="admin-label">Webhook URL</label>
+          <div className="admin-input flex items-center" style={{ minHeight: 42 }}>
+            <span className="font-mono text-xs break-all" style={{ color: '#94a3b8' }}>{webhookUrl}</span>
+          </div>
+          <p className="text-xs mt-2 leading-relaxed" style={{ color: '#334155' }}>
+            In your Stripe Dashboard, add a webhook endpoint at this URL listening for{' '}
+            <code>checkout.session.completed</code>, then paste its signing secret above. Find your Secret Key and create the webhook at{' '}
+            <a href="https://dashboard.stripe.com/apikeys" target="_blank" rel="noopener noreferrer"
+              className="underline" style={{ color: '#6366f1' }}>
+              dashboard.stripe.com/apikeys
+            </a>.
           </p>
         </div>
       </div>

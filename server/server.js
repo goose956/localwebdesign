@@ -19,6 +19,9 @@ const planSignupRoutes   = require('./routes/plan_signup');
 const briefsRoutes       = require('./routes/briefs');
 const siteSyncRoutes    = require('./routes/site_sync');
 const clientsRoutes     = require('./routes/clients');
+const pricingRoutes      = require('./routes/pricing');
+const checkoutRoutes     = require('./routes/checkout');
+const stripeWebhookRoutes = require('./routes/stripe_webhook');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -28,6 +31,7 @@ const apiLimiter     = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 const contactLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: { error: 'Too many submissions, please try again later.' } });
 const chatLimiter    = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many chat messages, please slow down.' } });
 const siteSyncLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many sync requests, please slow down.' } });
+const checkoutLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 20, message: { error: 'Too many attempts, please try again later.' } });
 
 // CUSTOM_DOMAINS (comma-separated, no protocol — e.g. "opentwentyfour.co.uk,www.opentwentyfour.co.uk")
 // lets a custom domain added in Railway start working again with just an env var + redeploy,
@@ -72,7 +76,14 @@ app.use((req, res, next) => {
   return (isOpenPath ? openCors : strictCors)(req, res, next);
 });
 
-app.use(express.json({ limit: '2mb' }));
+// Stripe's webhook signature check needs the exact raw request body, so that one path is
+// excluded from the global JSON parser here and given express.raw() where it's mounted below —
+// running both parsers on the same request would consume the body stream twice.
+const jsonParser = express.json({ limit: '2mb' });
+app.use((req, res, next) => {
+  if (req.path === '/api/stripe/webhook') return next();
+  return jsonParser(req, res, next);
+});
 app.use('/api', apiLimiter);
 
 // Portfolio thumbnails uploaded from Site Builder — plain static file serving, no CORS needed
@@ -94,6 +105,9 @@ app.use('/api/plan-signup',  planSignupRoutes);
 app.use('/api/briefs',       briefsRoutes);
 app.use('/api/site-sync', siteSyncLimiter, siteSyncRoutes);
 app.use('/api/clients',   clientsRoutes);
+app.use('/api/pricing',   pricingRoutes);
+app.use('/api/checkout',  checkoutLimiter, checkoutRoutes);
+app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }), stripeWebhookRoutes);
 
 // Health check
 app.get('/api/health', (_req, res) => res.json({ status: 'ok', timestamp: new Date().toISOString() }));

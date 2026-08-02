@@ -14,6 +14,7 @@ import AdminLayout       from './admin/AdminLayout.jsx';
 import ProtectedRoute    from './admin/ProtectedRoute.jsx';
 import Dashboard         from './admin/Dashboard.jsx';
 import ThemeBuilder      from './admin/ThemeBuilder.jsx';
+import PricingManager    from './admin/PricingManager.jsx';
 import ContactMessages   from './admin/ContactMessages.jsx';
 import PortfolioManager  from './admin/PortfolioManager.jsx';
 import ReviewsManager    from './admin/ReviewsManager.jsx';
@@ -43,6 +44,7 @@ export default function App() {
             <Route path="/admin" element={<ProtectedRoute><AdminLayout /></ProtectedRoute>}>
               <Route path="dashboard"  element={<Dashboard />} />
               <Route path="themes"     element={<ThemeBuilder />} />
+              <Route path="pricing"    element={<PricingManager />} />
               <Route path="messages"   element={<ContactMessages />} />
               <Route path="portfolio"  element={<PortfolioManager />} />
               <Route path="reviews"    element={<ReviewsManager />} />

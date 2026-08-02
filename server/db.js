@@ -411,6 +411,25 @@ if (knowledgeCount.count === 0) {
   console.log('✓ Chat knowledge base seeded');
 }
 
+// Seed default pricing (amounts stored in pence) — matches the values that used to be
+// hardcoded directly in Pricing.jsx before admin-editable pricing existed. ON CONFLICT DO
+// NOTHING so this never clobbers an amount an admin has since changed.
+const defaultPricing = {
+  price_starter_monthly: '4000',
+  price_starter_yearly:  '3400',
+  price_voice_monthly:   '13000',
+  price_voice_yearly:    '11000',
+  price_agent_monthly:   '49900',
+  price_agent_yearly:    '42400',
+};
+const insertPricingDefault = db.prepare(`
+  INSERT INTO site_settings (key, value) VALUES (?, ?)
+  ON CONFLICT(key) DO NOTHING
+`);
+for (const [key, value] of Object.entries(defaultPricing)) {
+  insertPricingDefault.run(key, value);
+}
+
 // Seed default admin
 const adminCount = db.prepare('SELECT COUNT(*) as count FROM admin_users').get();
 if (adminCount.count === 0) {

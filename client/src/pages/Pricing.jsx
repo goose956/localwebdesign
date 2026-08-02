@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
@@ -6,7 +6,7 @@ import CTA from '../components/CTA.jsx';
 import useReveal from '../hooks/useReveal.js';
 
 /* ── Plan sign-up modal ── */
-function PlanModal({ plan, onClose }) {
+function PlanModal({ plan, billing, onClose }) {
   const [form, setForm]     = useState({ name: '', email: '' });
   const [status, setStatus] = useState('idle'); // idle | loading | success | error
   const [errMsg, setErrMsg] = useState('');
@@ -22,6 +22,23 @@ function PlanModal({ plan, onClose }) {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Something went wrong');
+
+      // Lead is captured — now try to send them on to Stripe to actually pay. If Stripe
+      // hasn't been connected in the admin panel yet, fall back to the plain success screen
+      // rather than blocking lead capture on it.
+      try {
+        const coRes = await fetch('/api/checkout/create-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ plan: plan.key, billing, name: form.name, email: form.email }),
+        });
+        const coData = await coRes.json();
+        if (coRes.ok && coData.url) {
+          window.location.href = coData.url;
+          return;
+        }
+      } catch {}
+
       setStatus('success');
     } catch (err) {
       setErrMsg(err.message);
@@ -115,13 +132,17 @@ function PlanModal({ plan, onClose }) {
 // Ongoing monthly service, not a one-off build cost — Monthly = pay-as-you-go; Yearly = paid
 // upfront for the year at ~15% off (still a subscription, just billed annually, unlike the
 // old one-off/ownership framing this replaced).
+// Fallback amounts (£/month) used until /api/pricing responds — kept in sync with the
+// defaults seeded server-side in db.js. The admin's Pricing page is the actual source of
+// truth once loaded.
 const plans = [
   {
+    key: 'starter',
     name: 'Starter AI',
     tagline: 'Never miss an enquiry',
     desc: 'A beautiful website plus an AI chat assistant that captures every enquiry — perfect for getting started.',
-    monthly: { amount: '40', label: 'Billed monthly' },
-    yearly:  { amount: '34', label: 'Billed annually · £408 total', saving: '£72', savingPct: '15%' },
+    defaultMonthly: 40,
+    defaultYearly: 34,
     groups: [
       { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
       { title: 'Respond', items: ['AI chat assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
@@ -131,11 +152,12 @@ const plans = [
     popular: false,
   },
   {
+    key: 'voice',
     name: 'Voice Receptionist AI',
     tagline: 'Chat & voice',
     desc: 'Everything in Starter, plus a real AI voice receptionist that answers your phone around the clock.',
-    monthly: { amount: '130', label: 'Billed monthly' },
-    yearly:  { amount: '110', label: 'Billed annually · £1,320 total', saving: '£240', savingPct: '15%' },
+    defaultMonthly: 130,
+    defaultYearly: 110,
     groups: [
       { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
       { title: 'Respond', items: ['AI chat AND voice assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
@@ -145,11 +167,12 @@ const plans = [
     popular: true,
   },
   {
+    key: 'agent',
     name: 'Voice AI & Agent',
     tagline: 'Full autopilot growth',
     desc: 'Everything in Voice Receptionist, plus an AI agent that chases reviews, creates content, and posts to social — all on autopilot.',
-    monthly: { amount: '499', label: 'Billed monthly' },
-    yearly:  { amount: '424', label: 'Billed annually · £5,088 total', saving: '£900', savingPct: '15%' },
+    defaultMonthly: 499,
+    defaultYearly: 424,
     groups: [
       { title: 'Attract new customers', items: ['Beautiful, professionally designed website'] },
       { title: 'Respond', items: ['AI chat AND voice assistant', "Never miss a job — any enquiry texted direct to your mobile"] },
@@ -164,6 +187,30 @@ const plans = [
     popular: false,
   },
 ];
+
+// £ amounts can be whole or have pence — show decimals only when they're non-zero.
+const fmtAmount = (n) => Number.isInteger(n) ? String(n) : n.toFixed(2);
+
+function resolvePlans(plans, pricingData) {
+  return plans.map(p => {
+    const live = pricingData?.[p.key];
+    const monthlyAmt = live ? live.monthly : p.defaultMonthly;
+    const yearlyAmt  = live ? live.yearly  : p.defaultYearly;
+    const yearlyTotal = yearlyAmt * 12;
+    const savingAnnual = Math.max(0, Math.round((monthlyAmt - yearlyAmt) * 12 * 100) / 100);
+    const savingPct = monthlyAmt > 0 ? Math.round((1 - yearlyAmt / monthlyAmt) * 100) : 0;
+    return {
+      ...p,
+      monthly: { amount: monthlyAmt, label: 'Billed monthly' },
+      yearly: {
+        amount: yearlyAmt,
+        label: `Billed annually · £${fmtAmount(yearlyTotal)} total`,
+        saving: `£${fmtAmount(savingAnnual)}`,
+        savingPct: `${savingPct}%`,
+      },
+    };
+  });
+}
 
 const CheckIcon = () => (
   <svg className="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -204,7 +251,7 @@ function PricingCard({ plan, billing, delay, onSelect }) {
       <div className="mb-5">
         <div className="flex items-end gap-1 mb-1">
           <span className="font-display font-bold" style={{ fontSize: '3rem', lineHeight: 1, color: 'var(--text-primary)' }}>
-            £{pricing.amount}
+            £{fmtAmount(pricing.amount)}
           </span>
           <span className="text-lg font-medium mb-1.5" style={{ color: 'var(--text-secondary)' }}>/mo</span>
         </div>
@@ -263,12 +310,29 @@ function PricingCard({ plan, billing, delay, onSelect }) {
 export default function Pricing() {
   const [billing, setBilling]       = useState('monthly');
   const [selectedPlan, setSelectedPlan] = useState(null);
+  const [pricingData, setPricingData]   = useState(null);
+  const [checkoutNotice, setCheckoutNotice] = useState(null);
   const ref = useReveal();
+
+  useEffect(() => {
+    fetch('/api/pricing').then(r => r.ok ? r.json() : null).then(d => d && setPricingData(d)).catch(() => {});
+
+    const params = new URLSearchParams(window.location.search);
+    const checkout = params.get('checkout');
+    if (checkout === 'success' || checkout === 'cancelled') {
+      setCheckoutNotice(checkout);
+      params.delete('checkout');
+      const qs = params.toString();
+      window.history.replaceState({}, '', `/pricing${qs ? `?${qs}` : ''}`);
+    }
+  }, []);
+
+  const resolvedPlans = resolvePlans(plans, pricingData);
 
   return (
     <>
       <Navbar />
-      {selectedPlan && <PlanModal plan={selectedPlan} onClose={() => setSelectedPlan(null)} />}
+      {selectedPlan && <PlanModal plan={selectedPlan} billing={billing} onClose={() => setSelectedPlan(null)} />}
       <main style={{ background: 'var(--bg-primary)' }}>
         {/* Hero */}
         <section className="page-hero" style={{ background: 'var(--gradient-bg)' }}>
@@ -313,8 +377,19 @@ export default function Pricing() {
               </div>
             </div>
 
+            {checkoutNotice && (
+              <div className="max-w-2xl mx-auto mb-8 text-center px-5 py-3.5 rounded-2xl text-sm"
+                style={checkoutNotice === 'success'
+                  ? { background: 'rgba(16,185,129,0.1)', color: '#34d399', border: '1px solid rgba(16,185,129,0.25)' }
+                  : { background: 'rgba(239,68,68,0.08)', color: '#f87171', border: '1px solid rgba(239,68,68,0.2)' }}>
+                {checkoutNotice === 'success'
+                  ? "🎉 You're subscribed! We'll be in touch shortly to get started."
+                  : 'Checkout cancelled — no payment was taken.'}
+              </div>
+            )}
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              {plans.map((plan, i) => (
+              {resolvedPlans.map((plan, i) => (
                 <PricingCard key={plan.name} plan={plan} billing={billing} delay={i * 100} onSelect={setSelectedPlan} />
               ))}
             </div>
