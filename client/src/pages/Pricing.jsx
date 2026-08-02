@@ -319,6 +319,8 @@ export default function Pricing() {
               ))}
             </div>
 
+            <MoneyBackGuarantee />
+
             {/* Context banner — below the cards */}
             <div className="max-w-2xl mx-auto mt-8">
               {billing === 'yearly' ? (
@@ -351,6 +353,33 @@ export default function Pricing() {
       </main>
       <Footer />
     </>
+  );
+}
+
+function MoneyBackGuarantee() {
+  const ref = useReveal();
+  return (
+    <div className="max-w-2xl mx-auto mt-10 mb-2 reveal" ref={ref}>
+      <div className="glass rounded-2xl px-6 py-5 flex items-center gap-4"
+        style={{ border: '1px solid rgba(16,185,129,0.25)', background: 'rgba(16,185,129,0.06)' }}>
+        <div className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ background: 'rgba(16,185,129,0.15)', border: '1px solid rgba(16,185,129,0.35)' }}>
+          <svg className="w-6 h-6" fill="none" stroke="#34d399" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+              d="M12 3l7 3v5c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V6l7-3z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 12.5l2 2 4-4.5" />
+          </svg>
+        </div>
+        <div>
+          <p className="font-display font-bold text-base" style={{ color: 'var(--text-primary)' }}>
+            30-Day Money-Back Guarantee
+          </p>
+          <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+            Cancel within your first 30 days and we'll refund your payment in full.
+          </p>
+        </div>
+      </div>
+    </div>
   );
 }
 
