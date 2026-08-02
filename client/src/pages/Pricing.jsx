@@ -183,7 +183,7 @@ const plans = [
       ] },
       { title: 'Hosting', items: ['Unlimited AI chat responses', '1000 minutes/month voice agent credits', 'Full web support'] },
     ],
-    cta: "Let's Talk",
+    cta: 'Get Started',
     popular: false,
   },
 ];
