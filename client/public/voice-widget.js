@@ -184,6 +184,13 @@ apiBase = (apiBase || '').replace(/\/$/, '');
     state.outputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
     state.inputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
     state.nextPlayTime = 0;
+    // A fresh AudioContext can start life 'suspended' — browsers are inconsistent about honouring
+    // the original click as a user-gesture once real async work (fetch, getUserMedia) has
+    // happened in between. Suspended means silence: mic capture never fires and scheduled
+    // playback never actually outputs, with no error thrown anywhere — explicitly resuming both
+    // closes off that failure mode rather than hoping the browser treats this as gesture-adjacent.
+    try { state.outputCtx.resume(); } catch (e) {}
+    try { state.inputCtx.resume(); } catch (e) {}
 
     // apiVersion: 'v1alpha' is required for ephemeral tokens — the SDK itself warns at runtime
     // if this is omitted ("The SDK's ephemeral token support is in v1alpha only"). Confirmed by
@@ -201,6 +208,16 @@ apiBase = (apiBase || '').replace(/\/$/, '');
             state.active = true;
             bubble.classList.add('pc-voice-live');
             showStatus('Listening — talk anytime.');
+            // Nudge the model to speak first, like answering a phone, instead of sitting silent
+            // until the visitor says something. This isn't real visitor speech — it's a stage
+            // direction the system instruction (server-side) is written to recognise as one and
+            // respond to with a short greeting, not literal conversation content.
+            try {
+              state.session.sendClientContent({
+                turns: [{ role: 'user', parts: [{ text: '(Call connected.)' }] }],
+                turnComplete: true,
+              });
+            } catch (e) {}
           },
           onmessage: function (message) {
             if (message.serverContent && message.serverContent.interrupted) clearQueuedAudio();

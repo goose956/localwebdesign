@@ -57,7 +57,11 @@ router.post('/token', async (req, res) => {
     `Answer using ONLY the information above — never invent services, prices, or availability. If ` +
     `asked about cost, say pricing depends on the job and suggest calling ${client.phone || 'the business'} ` +
     `for an accurate quote. Always steer the conversation toward the visitor calling ` +
-    `${client.phone || 'the business'} or leaving their details.`;
+    `${client.phone || 'the business'} or leaving their details.\n\n` +
+    `The very first message you receive each session is not from the visitor — it's a stage ` +
+    `direction telling you the call has just connected. Answer it the way a receptionist answers a ` +
+    `ringing phone: a brief, warm greeting naming the business (e.g. "${client.business_name}, how ` +
+    `can I help?"), then stop and wait — do not pre-empt what the visitor might ask.`;
 
   try {
     const expireTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
