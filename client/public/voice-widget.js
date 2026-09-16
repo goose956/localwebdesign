@@ -243,18 +243,40 @@ apiBase = (apiBase || '').replace(/\/$/, '');
       });
     } catch (e) {}
 
-    // Mic capture: Web Audio resamples a MediaStream source to the AudioContext's own sample
-    // rate (16000 here) automatically — no manual resampling math needed. ScriptProcessorNode is
-    // deprecated but still universally supported, and is the simplest single-file way to read
-    // raw PCM frames without hosting a separate AudioWorklet module file for this demo widget.
+    // Mic capture. Gemini's documented requirement is exactly 16-bit PCM at 16kHz — we ask the
+    // AudioContext for that rate when creating it, but the `sampleRate` constructor option is
+    // only a request; a browser is free to ignore it and hand back its own native rate instead
+    // (this varies by browser/OS/device). Rather than gamble on whether that actually happened,
+    // linearly resample every chunk to exactly 16000 ourselves so the outgoing audio always
+    // matches what we label it as, regardless of what the browser actually gave us.
+    // ScriptProcessorNode is deprecated but still universally supported, and is the simplest
+    // single-file way to read raw PCM frames without hosting a separate AudioWorklet module file
+    // for this demo widget.
+    function resampleTo16k(float32, fromRate) {
+      if (fromRate === 16000) return float32;
+      var ratio = fromRate / 16000;
+      var newLength = Math.max(1, Math.round(float32.length / ratio));
+      var result = new Float32Array(newLength);
+      for (var i = 0; i < newLength; i++) {
+        var srcIndex = i * ratio;
+        var i0 = Math.floor(srcIndex);
+        var i1 = Math.min(i0 + 1, float32.length - 1);
+        var frac = srcIndex - i0;
+        result[i] = float32[i0] * (1 - frac) + float32[i1] * frac;
+      }
+      return result;
+    }
+
+    var actualSampleRate = state.inputCtx.sampleRate;
     var source = state.inputCtx.createMediaStreamSource(stream);
     var processor = state.inputCtx.createScriptProcessor(4096, 1, 1);
     processor.onaudioprocess = function (e) {
       if (!state.active || !state.session) return;
       var input = e.inputBuffer.getChannelData(0);
-      var pcm16 = new Int16Array(input.length);
-      for (var i = 0; i < input.length; i++) {
-        var s = Math.max(-1, Math.min(1, input[i]));
+      var resampled = resampleTo16k(input, actualSampleRate);
+      var pcm16 = new Int16Array(resampled.length);
+      for (var i = 0; i < resampled.length; i++) {
+        var s = Math.max(-1, Math.min(1, resampled[i]));
         pcm16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
       }
       try {
