@@ -9,11 +9,12 @@ const router = express.Router();
 // current model id and update this constant — nothing else needs to change.
 const LIVE_MODEL = 'models/gemini-3.8-live';
 
-// "Capella" is the HD voice Google's own docs call out as carrying a British accent. The formal
-// en-GB language code isn't supported yet on native-audio models, so the accent is reinforced via
-// the system instruction below (specific phrasing, not just "British accent") rather than a
-// locale setting.
+// "Capella" is the HD voice Google's own docs call out as carrying a British accent. Confirmed
+// against the live v1beta discovery doc (2026-09-16) that `en-GB` IS a valid SpeechConfig
+// languageCode for this model — combined with the system instruction's explicit phrasing below,
+// not relying on the voice/prompt alone.
 const VOICE_NAME = 'Capella';
+const LANGUAGE_CODE = 'en-GB';
 
 // POST /api/voice/token — mints a short-lived Gemini Live API token scoped to one Site Builder
 // demo site's synced business data, so a public demo page can open a voice session directly with
@@ -60,20 +61,29 @@ router.post('/token', async (req, res) => {
 
   try {
     const expireTime = new Date(Date.now() + 30 * 60 * 1000).toISOString();
+    // Field names verified 2026-09-16 against Google's own v1beta discovery doc — the Live API
+    // docs page describing this as `liveConnectConstraints` was wrong/outdated; the real
+    // AuthToken resource nests everything under `bidiGenerateContentSetup`. Because fieldMask is
+    // left empty here, this pinned setup entirely REPLACES whatever the browser client sends on
+    // connect (per the schema's own documented behaviour) — that's what makes locking it here
+    // actually secure, not just a hint the client could override.
     const tokenRes = await fetch('https://generativelanguage.googleapis.com/v1beta/auth_tokens', {
       method: 'POST',
       headers: { 'x-goog-api-key': apiKey, 'Content-Type': 'application/json' },
       body: JSON.stringify({
         uses: 1,
         expireTime,
-        liveConnectConstraints: {
+        bidiGenerateContentSetup: {
           model: LIVE_MODEL,
-          config: {
-            systemInstruction: { parts: [{ text: systemInstruction }] },
+          systemInstruction: { parts: [{ text: systemInstruction }] },
+          generationConfig: {
             responseModalities: ['AUDIO'],
-            speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_NAME } } },
-            tools: [],
+            speechConfig: {
+              voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_NAME } },
+              languageCode: LANGUAGE_CODE,
+            },
           },
+          tools: [],
         },
       }),
     });
