@@ -14,20 +14,9 @@
  * --sb-primary -> --sb-primary-dark wherever the original widget used var(--gradient).
  */
 (function () {
-  var slot = document.getElementById('chat-widget-slot');
-  if (!slot) return; // inert without the mount point — safe to include on any page
-
-  var siteId = slot.getAttribute('data-site-id') || '';
-
-  var siteDataEl = document.getElementById('site-data');
-  var siteData = {};
-  try { siteData = siteDataEl ? JSON.parse(siteDataEl.textContent) : {}; } catch (e) {}
-  var businessName = siteData.name || 'us';
-  var businessPhone = siteData.phone || '';
-
-  // The <script> tag that loaded this file — used to read config attributes and, as a
-  // fallback, to derive the API's origin from this script's own src (since it's served by the
-  // very same OpenTwentyFour app the API lives on).
+  // document.currentScript is only valid during this script's initial synchronous run — must be
+  // captured right here, before any polling/deferral below, or it reverts to null by the time a
+  // setInterval callback runs.
   var thisScript = document.currentScript;
   var apiBase = (thisScript && thisScript.getAttribute('data-api-base')) || '';
   if (!apiBase && thisScript && thisScript.src) {
@@ -35,6 +24,28 @@
   }
   apiBase = (apiBase || '').replace(/\/$/, '');
   if (!apiBase) return; // nothing sensible to call — stay inert rather than error
+
+  // This is a <head> script (async, so it can execute at essentially any point relative to
+  // parsing) racing against the React app below it, which is what actually creates
+  // #chat-widget-slot — checking once and bailing if it's not there yet (the original approach)
+  // could silently no-op depending on load timing. Poll briefly instead; give up after 10s in
+  // case something's genuinely wrong rather than polling forever.
+  var attempts = 0;
+  var pollTimer = setInterval(function () {
+    attempts++;
+    var slot = document.getElementById('chat-widget-slot');
+    if (slot) { clearInterval(pollTimer); init(slot); }
+    else if (attempts >= 100) { clearInterval(pollTimer); }
+  }, 100);
+
+  function init(slot) {
+  var siteId = slot.getAttribute('data-site-id') || '';
+
+  var siteDataEl = document.getElementById('site-data');
+  var siteData = {};
+  try { siteData = siteDataEl ? JSON.parse(siteDataEl.textContent) : {}; } catch (e) {}
+  var businessName = siteData.name || 'us';
+  var businessPhone = siteData.phone || '';
 
   // ---- styles ---------------------------------------------------------------------------
   var style = document.createElement('style');
@@ -174,4 +185,5 @@
   });
 
   render();
+  } // end init()
 })();

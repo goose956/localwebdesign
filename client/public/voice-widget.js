@@ -20,23 +20,37 @@
  */
 import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai';
 
+// document.currentScript is spec'd to return null inside a type="module" script — it only works
+// for classic scripts (which is why widget.js, a classic script, could use it). import.meta.url
+// is the module-correct equivalent, and since this file is always served from the same origin as
+// the API it calls (Site Builder always sets pixelCraftApiUrl to that one server), deriving
+// apiBase from it needs no separate data-api-base attribute at all.
+var apiBase = '';
+try { apiBase = new URL(import.meta.url).origin; } catch (e) {}
+apiBase = (apiBase || '').replace(/\/$/, '');
+
 (function () {
-  var slot = document.getElementById('chat-widget-slot');
-  if (!slot) return; // inert without the mount point — safe to include on any page
-
-  var siteId = slot.getAttribute('data-site-id') || '';
-
-  var thisScript = document.currentScript;
-  var apiBase = (thisScript && thisScript.getAttribute('data-api-base')) || '';
-  if (!apiBase && thisScript && thisScript.src) {
-    try { apiBase = new URL(thisScript.src).origin; } catch (e) {}
-  }
-  apiBase = (apiBase || '').replace(/\/$/, '');
   if (!apiBase) return; // nothing sensible to call — stay inert rather than error
 
   if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !(window.AudioContext || window.webkitAudioContext)) {
     return; // unsupported browser — stay inert rather than show a button that can only fail
   }
+
+  // This is a <head> script, executed before the React app below it in the document has had a
+  // chance to mount and render #chat-widget-slot — checking for it once and bailing if absent
+  // (the original approach) meant this NEVER found it, deterministically, not just as a rare
+  // race. Poll briefly instead; give up after 10s in case something's genuinely wrong rather than
+  // polling forever.
+  var attempts = 0;
+  var pollTimer = setInterval(function () {
+    attempts++;
+    var slot = document.getElementById('chat-widget-slot');
+    if (slot) { clearInterval(pollTimer); init(slot); }
+    else if (attempts >= 100) { clearInterval(pollTimer); }
+  }, 100);
+
+  function init(slot) {
+  var siteId = slot.getAttribute('data-site-id') || '';
 
   // ---- styles ---------------------------------------------------------------------------
   var style = document.createElement('style');
@@ -227,4 +241,5 @@ import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai';
   bubble.addEventListener('click', function () {
     if (state.active) stop(); else start();
   });
+  } // end init()
 })();
