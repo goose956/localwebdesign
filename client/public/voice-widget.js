@@ -1,17 +1,24 @@
 /* OpenTwentyFour voice agent widget — a Gemini Live API voice demo embedded on Site Builder
  * demo sites via <script type="module" src=".../voice-widget.js?v=1" data-site-id="..."
  * data-api-base="..."> injected at publish time when a site's voiceEnabled flag is on. Loads
- * the official @google/genai SDK straight from jsDelivr's browser-ready ESM build (no bundler
- * needed here — this file ships byte-for-byte from client/public/, same as widget.js) and opens
- * a direct browser-to-Gemini WebSocket session using a short-lived token minted by
- * /api/voice/token — this file, and this server, never see the real Gemini API key.
+ * the official @google/genai SDK from esm.sh (no bundler needed here — this file ships
+ * byte-for-byte from client/public/, same as widget.js) and opens a direct browser-to-Gemini
+ * WebSocket session using a short-lived token minted by /api/voice/token — this file, and this
+ * server, never see the real Gemini API key.
+ *
+ * esm.sh, not jsDelivr's raw dist/web/index.mjs: that file ships with an unresolved bare
+ * `import pRetry from 'p-retry'` baked in, which is a valid Node-style import but not something a
+ * browser can resolve on its own (bare specifiers need an import map or a bundler) — it throws
+ * "Failed to resolve module specifier" and the whole script fails before the mic bubble ever
+ * renders. esm.sh rewrites the entire dependency graph to real, fetchable URLs; confirmed by
+ * pulling its resolved bundle and checking it has zero remaining bare imports.
  *
  * Shares the same #chat-widget-slot mount point as widget.js (both are inert without it, and
  * both just append their own elements into it independently — no coordination needed between
  * the two scripts). Positioned bottom-LEFT so it never collides with the chat bubble at
  * bottom-right when a site has both enabled.
  */
-import { GoogleGenAI, Modality } from 'https://cdn.jsdelivr.net/npm/@google/genai@latest/dist/web/index.mjs';
+import { GoogleGenAI, Modality } from 'https://esm.sh/@google/genai';
 
 (function () {
   var slot = document.getElementById('chat-widget-slot');
