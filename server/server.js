@@ -74,7 +74,13 @@ const openCors = cors({ origin: true, credentials: false });
 // ones get a chance to run first), so a second, path-mounted cors() can never actually
 // override an earlier blanket one. Branching on req.path inside one middleware is what
 // actually makes "open for these two paths, strict for everything else" work.
-const OPEN_CORS_PATHS = ['/api/chat', '/api/site-sync', '/api/voice'];
+// widget.js (chat) never needed an entry here despite being loaded cross-origin from every demo
+// site — a classic <script src> tag isn't subject to CORS enforcement, only fetch()/XHR/module
+// scripts are. voice-widget.js has to be type="module" (it uses a top-level `import` for the
+// @google/genai SDK), and ES module script loading IS CORS-enforced, so it needs its static path
+// open the same way the API routes below do — otherwise every demo site's browser silently
+// refuses to even run it ("blocked by CORS policy", no Access-Control-Allow-Origin header).
+const OPEN_CORS_PATHS = ['/api/chat', '/api/site-sync', '/api/voice', '/voice-widget.js'];
 app.use((req, res, next) => {
   const isOpenPath = OPEN_CORS_PATHS.some(p => req.path === p || req.path.startsWith(p + '/'));
   return (isOpenPath ? openCors : strictCors)(req, res, next);
