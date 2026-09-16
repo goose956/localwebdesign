@@ -174,11 +174,21 @@ apiBase = (apiBase || '').replace(/\/$/, '');
 
     var stream;
     try {
-      stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      // Explicitly disabling Chrome's default audio processing as a diagnostic: reported
+      // symptom is near-zero captured amplitude despite a working mic (confirmed via other
+      // voice tools on the same machine), while this widget is unusual in that it plays the
+      // agent's own reply through the speakers WHILE simultaneously trying to capture mic input
+      // — testing whether Chrome's default echo-cancellation/noise-suppression/auto-gain is
+      // over-suppressing genuine speech in that simultaneous-playback situation.
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: false, noiseSuppression: false, autoGainControl: false },
+      });
     } catch (e) {
+      console.error('[voice] getUserMedia failed:', e);
       showStatus('Microphone access is needed to talk — please allow it.', 4000);
       return;
     }
+    console.log('[voice] mic track settings:', JSON.stringify(stream.getAudioTracks()[0].getSettings()));
 
     state.stream = stream;
     state.outputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 24000 });
