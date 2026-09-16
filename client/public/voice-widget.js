@@ -185,7 +185,12 @@ apiBase = (apiBase || '').replace(/\/$/, '');
     state.inputCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
     state.nextPlayTime = 0;
 
-    var ai = new GoogleGenAI({ apiKey: tokenData.token });
+    // apiVersion: 'v1alpha' is required for ephemeral tokens — the SDK itself warns at runtime
+    // if this is omitted ("The SDK's ephemeral token support is in v1alpha only"). Confirmed by
+    // testing directly against this same token-minting endpoint: without it the session still
+    // opens (setupComplete fires) but something further down the pipeline doesn't behave
+    // correctly; with it, a real audio response comes back end-to-end.
+    var ai = new GoogleGenAI({ apiKey: tokenData.token, httpOptions: { apiVersion: 'v1alpha' } });
 
     try {
       state.session = await ai.live.connect({
