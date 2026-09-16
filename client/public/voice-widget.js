@@ -210,6 +210,16 @@ apiBase = (apiBase || '').replace(/\/$/, '');
             showStatus('Listening — talk anytime.');
           },
           onmessage: function (message) {
+            // Temporary diagnostic logging (server enables inputAudioTranscription /
+            // outputAudioTranscription specifically so this is possible) — shows in the
+            // browser's DevTools console whether Gemini is hearing anything from the mic at all,
+            // separate from whether the reply logic afterwards works.
+            var inTx = message.serverContent && message.serverContent.inputTranscription;
+            var outTx = message.serverContent && message.serverContent.outputTranscription;
+            if (inTx && inTx.text) console.log('[voice] heard from visitor:', inTx.text);
+            if (outTx && outTx.text) console.log('[voice] agent said:', outTx.text);
+            if (!inTx && !outTx) console.log('[voice] message:', JSON.stringify(message).slice(0, 500));
+
             if (message.serverContent && message.serverContent.interrupted) clearQueuedAudio();
             var parts = (message.serverContent && message.serverContent.modelTurn && message.serverContent.modelTurn.parts) || [];
             parts.forEach(function (p) {
@@ -218,8 +228,8 @@ apiBase = (apiBase || '').replace(/\/$/, '');
               }
             });
           },
-          onerror: function () { stop('Connection issue — try again.'); },
-          onclose: function () { if (state.active) stop(); },
+          onerror: function (e) { console.error('[voice] onerror:', e); stop('Connection issue — try again.'); },
+          onclose: function (e) { console.log('[voice] onclose:', e && e.reason); if (state.active) stop(); },
         },
       });
     } catch (e) {
@@ -268,11 +278,24 @@ apiBase = (apiBase || '').replace(/\/$/, '');
     }
 
     var actualSampleRate = state.inputCtx.sampleRate;
+    console.log('[voice] mic context actual sampleRate:', actualSampleRate, '(requested 16000) — resampling', actualSampleRate !== 16000 ? 'ACTIVE' : 'not needed, already 16000');
+
     var source = state.inputCtx.createMediaStreamSource(stream);
     var processor = state.inputCtx.createScriptProcessor(4096, 1, 1);
+    var frameCount = 0;
     processor.onaudioprocess = function (e) {
       if (!state.active || !state.session) return;
       var input = e.inputBuffer.getChannelData(0);
+      // Throttled diagnostic: peak amplitude of this chunk, roughly every 2s (4096 samples @
+      // ~16-48kHz native rate ≈ several chunks/sec) — near-zero every time means the mic isn't
+      // actually delivering signal (wrong device selected, muted at the OS level, etc.),
+      // separate from whether Gemini responds to what's sent.
+      frameCount++;
+      if (frameCount % 20 === 1) {
+        var peak = 0;
+        for (var j = 0; j < input.length; j++) { var a = Math.abs(input[j]); if (a > peak) peak = a; }
+        console.log('[voice] mic peak amplitude (0-1):', peak.toFixed(4), peak < 0.01 ? '— near-silent, check mic input' : '');
+      }
       var resampled = resampleTo16k(input, actualSampleRate);
       var pcm16 = new Int16Array(resampled.length);
       for (var i = 0; i < resampled.length; i++) {
@@ -281,7 +304,9 @@ apiBase = (apiBase || '').replace(/\/$/, '');
       }
       try {
         state.session.sendRealtimeInput({ media: { data: arrayBufferToBase64(pcm16.buffer), mimeType: 'audio/pcm;rate=16000' } });
-      } catch (e2) {}
+      } catch (e2) {
+        console.error('[voice] sendRealtimeInput failed:', e2);
+      }
     };
     source.connect(processor);
     processor.connect(state.inputCtx.destination);

@@ -80,6 +80,15 @@ router.post('/token', async (req, res) => {
         bidiGenerateContentSetup: {
           model: LIVE_MODEL,
           systemInstruction: { parts: [{ text: systemInstruction }] },
+          // Diagnostic aid, not a product feature yet: inputAudioTranscription surfaces what
+          // Gemini actually heard from the visitor's mic as text in serverContent — the widget
+          // logs it to the console, which is how we can tell "your audio never arrived / arrived
+          // as noise" apart from "it arrived fine but the reply logic is what's broken" without
+          // needing server-side audio logging. outputAudioTranscription alongside it for the same
+          // reason on the reply side. These must be set here (not client-side) — the client's own
+          // connect() config is fully replaced by this locked setup per the empty fieldMask above.
+          inputAudioTranscription: {},
+          outputAudioTranscription: {},
           generationConfig: {
             responseModalities: ['AUDIO'],
             speechConfig: {
