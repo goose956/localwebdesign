@@ -208,16 +208,6 @@ apiBase = (apiBase || '').replace(/\/$/, '');
             state.active = true;
             bubble.classList.add('pc-voice-live');
             showStatus('Listening — talk anytime.');
-            // Nudge the model to speak first, like answering a phone, instead of sitting silent
-            // until the visitor says something. This isn't real visitor speech — it's a stage
-            // direction the system instruction (server-side) is written to recognise as one and
-            // respond to with a short greeting, not literal conversation content.
-            try {
-              state.session.sendClientContent({
-                turns: [{ role: 'user', parts: [{ text: '(Call connected.)' }] }],
-                turnComplete: true,
-              });
-            } catch (e) {}
           },
           onmessage: function (message) {
             if (message.serverContent && message.serverContent.interrupted) clearQueuedAudio();
@@ -236,6 +226,22 @@ apiBase = (apiBase || '').replace(/\/$/, '');
       stop('Could not start voice session.');
       return;
     }
+
+    // Nudge the model to speak first, like answering a phone, instead of sitting silent until the
+    // visitor says something. Sent here — right after connect() resolves — rather than from
+    // inside onopen above: confirmed by direct testing that onopen fires BEFORE this outer await
+    // resolves and assigns state.session, so calling state.session.sendClientContent from inside
+    // onopen was hitting a still-null state.session and throwing, silently swallowed by a
+    // try/catch there — the greeting (and by extension this whole voice session) was never
+    // actually starting a turn. This isn't real visitor speech — it's a stage direction the
+    // system instruction (server-side) is written to recognise as one and respond to with a short
+    // greeting, not literal conversation content.
+    try {
+      state.session.sendClientContent({
+        turns: [{ role: 'user', parts: [{ text: '(Call connected.)' }] }],
+        turnComplete: true,
+      });
+    } catch (e) {}
 
     // Mic capture: Web Audio resamples a MediaStream source to the AudioContext's own sample
     // rate (16000 here) automatically — no manual resampling math needed. ScriptProcessorNode is
