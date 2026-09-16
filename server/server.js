@@ -18,6 +18,7 @@ const emailOctopusRoutes = require('./routes/emailoctopus');
 const planSignupRoutes   = require('./routes/plan_signup');
 const briefsRoutes       = require('./routes/briefs');
 const siteSyncRoutes    = require('./routes/site_sync');
+const voiceRoutes       = require('./routes/voice');
 const clientsRoutes     = require('./routes/clients');
 const pricingRoutes      = require('./routes/pricing');
 const checkoutRoutes     = require('./routes/checkout');
@@ -31,6 +32,9 @@ const apiLimiter     = rateLimit({ windowMs: 15 * 60 * 1000, max: 200 });
 const contactLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: { error: 'Too many submissions, please try again later.' } });
 const chatLimiter    = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many chat messages, please slow down.' } });
 const siteSyncLimiter = rateLimit({ windowMs: 60 * 1000, max: 30, message: { error: 'Too many sync requests, please slow down.' } });
+// A voice session covers a whole conversation, not a single message like chat, so the cap is
+// tighter than chatLimiter — mainly a guard against a token-minting loop, not real usage.
+const voiceLimiter    = rateLimit({ windowMs: 60 * 1000, max: 10, message: { error: 'Too many voice session requests, please slow down.' } });
 const checkoutLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 20, message: { error: 'Too many attempts, please try again later.' } });
 
 // CUSTOM_DOMAINS (comma-separated, no protocol — e.g. "opentwentyfour.co.uk,www.opentwentyfour.co.uk")
@@ -70,7 +74,7 @@ const openCors = cors({ origin: true, credentials: false });
 // ones get a chance to run first), so a second, path-mounted cors() can never actually
 // override an earlier blanket one. Branching on req.path inside one middleware is what
 // actually makes "open for these two paths, strict for everything else" work.
-const OPEN_CORS_PATHS = ['/api/chat', '/api/site-sync'];
+const OPEN_CORS_PATHS = ['/api/chat', '/api/site-sync', '/api/voice'];
 app.use((req, res, next) => {
   const isOpenPath = OPEN_CORS_PATHS.some(p => req.path === p || req.path.startsWith(p + '/'));
   return (isOpenPath ? openCors : strictCors)(req, res, next);
@@ -104,6 +108,7 @@ app.use('/api/emailoctopus', emailOctopusRoutes);
 app.use('/api/plan-signup',  planSignupRoutes);
 app.use('/api/briefs',       briefsRoutes);
 app.use('/api/site-sync', siteSyncLimiter, siteSyncRoutes);
+app.use('/api/voice',     voiceLimiter, voiceRoutes);
 app.use('/api/clients',   clientsRoutes);
 app.use('/api/pricing',   pricingRoutes);
 app.use('/api/checkout',  checkoutLimiter, checkoutRoutes);

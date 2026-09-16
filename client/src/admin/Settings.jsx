@@ -48,6 +48,31 @@ const FIELDS = [
     ],
   },
   {
+    section: 'Voice Agent',
+    icon: '🎙️',
+    desc: 'Powers the voice-call demo widget on chat-enabled Site Builder demo sites (British accent).',
+    fields: [
+      {
+        key: 'gemini_api_key',
+        label: 'Gemini API Key',
+        placeholder: 'AIza…',
+        type: 'password',
+        sensitive: true,
+        hint: (
+          <>
+            Get your key at{' '}
+            <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener noreferrer"
+              className="underline" style={{ color: '#6366f1' }}>
+              aistudio.google.com/apikey
+            </a>
+            . Used server-side only, to mint short-lived session tokens for the Gemini Live voice widget —
+            never sent to the browser.
+          </>
+        ),
+      },
+    ],
+  },
+  {
     section: 'Company Details',
     icon: '🏢',
     desc: 'Used by the AI chatbot when answering questions about contacting you.',
